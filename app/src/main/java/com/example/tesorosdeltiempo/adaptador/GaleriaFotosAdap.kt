@@ -1,48 +1,38 @@
-package com.example.tesorosdeltiempo.adaptador;
+package com.example.tesorosdeltiempo.adaptador
 
-import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridLayout;
-import android.widget.ImageView;
+import android.content.Context
+import android.view.View
+import android.view.ViewGroup
+import android.widget.BaseAdapter
+import android.widget.GridView
+import android.widget.ImageView
+import com.example.tesorosdeltiempo.R
 
-import com.example.tesorosdeltiempo.R;
+class GaleriaFotosAdap(private val mContext: Context) : BaseAdapter() {
 
-public class GaleriaFotosAdap extends BaseAdapter {
-    private Context mContext;
-    public int[] imageArray = {
-            R.drawable.ImPrueba,
-            R.drawable.ImPrueba2
-    };
+    private val imageArray = intArrayOf(
+        R.drawable.imprueba,
+        R.drawable.imprueba2
+    )
 
-    public GaleriaFotosAdap(Context mContext) {
-        this.mContext = mContext;
+    override fun getCount(): Int {
+        return imageArray.size
     }
 
-    @Override
-    public int getCount() {
-        return imageArray.length;
+    override fun getItem(position: Int): Any {
+        return imageArray[position]
     }
 
-    @Override
-    public Object getItem(int position) {
-        return imageArray[position];
+    override fun getItemId(position: Int): Long {
+        return position.toLong()
     }
 
-    @Override
-    public long getItemId(int position) {
-        return 0;
-    }
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView = new ImageView(mContext);
-        imageView.setImageResource(imageArray[position]);
-        imageView.setScaleType((ImageView.ScaleType.CENTER_CROP));
-        // w:340 y h:350
-        imageView.setLayoutParams(new GridLayout.LayoutParams(340, 350) );
+        val imageView = ImageView(mContext)
+        imageView.setImageResource(imageArray[position])
+        imageView.scaleType = ImageView.ScaleType.CENTER_CROP
 
-        return imageView;
+        return imageView
     }
 }

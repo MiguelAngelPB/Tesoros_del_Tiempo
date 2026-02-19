@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TesorosDelTiempo">
         <activity
+            android:name=".ImagenCompleta"
+            android:exported="false"
+            android:label="@string/title_activity_imagen_completa"
+            android:theme="@style/Theme.TesorosDelTiempo" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.TesorosDelTiempo">
