@@ -1,5 +1,6 @@
 package com.example.tesorosdeltiempo
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
@@ -17,6 +18,16 @@ class ImagenCompleta : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_imagen_completa)
+
+        imageView = findViewById(R.id.iv_foto)
+
+        supportActionBar?.title = "Foto Completa"
+
+        val intent: Intent = intent
+        val posicion = intent.extras?.getInt("misImagenes") ?: 0
+
+        galeriaFotosAdapter = GaleriaFotosAdap(this)
+        imageView.setImageResource(galeriaFotosAdapter.getItem(posicion) as Int)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())

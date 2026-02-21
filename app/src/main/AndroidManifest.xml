@@ -10,12 +10,15 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TesorosDelTiempo">
+        android:theme="@style/Theme.TesorosDelTiempo"
+        android:hardwareAccelerated="false"
+        android:largeHeap="true">
         <activity
             android:name=".ImagenCompleta"
             android:exported="false"
             android:label="@string/title_activity_imagen_completa"
-            android:theme="@style/Theme.TesorosDelTiempo" />
+            android:theme="@style/Theme.TesorosDelTiempo"
+            android:parentActivityName=".MainActivity"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
