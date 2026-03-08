@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Tesoros del Tiempo"
 include(":app")
- 

@@ -1,51 +1,53 @@
 package com.example.tesorosdeltiempo.adaptador
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.BaseAdapter
 import android.widget.ImageView
-import com.example.tesorosdeltiempo.R
+import com.example.tesorosdeltiempo.BD.datos.RecuerdosEntity
 
 class GaleriaFotosAdap(private val mContext: Context) : BaseAdapter() {
 
-    val imageArray = intArrayOf(
-        R.drawable.imagen1,
-        R.drawable.imagen2,
-        R.drawable.imagen3,
-        R.drawable.imagen4,
-        R.drawable.imagen5,
-        R.drawable.imagen6,
-        R.drawable.imagen7,
-        R.drawable.imagen8,
-        R.drawable.imagen9,
-        R.drawable.imagen10,
-        R.drawable.imagen11,
-        R.drawable.imagen12,
-        R.drawable.imagen13,
-        R.drawable.imagen14,
-        R.drawable.imagen15,
-        R.drawable.imagen16,
-        R.drawable.imagen17,
-        R.drawable.imagen18,
-        R.drawable.imagen19,
-        R.drawable.imagen20,
-        R.drawable.imagen21,
-        R.drawable.imagen22,
+    private var recuerdos: List<RecuerdosEntity> = emptyList()
 
-        )
+    fun submitList(nuevosRecuerdos: List<RecuerdosEntity>) {
+        recuerdos = nuevosRecuerdos
+        notifyDataSetChanged()
+    }
 
-    override fun getCount(): Int = imageArray.size
+    override fun getCount(): Int = recuerdos.size
 
-    override fun getItem(position: Int): Any = imageArray[position]
+    override fun getItem(position: Int): Any = recuerdos[position]
 
-    override fun getItemId(position: Int): Long = position.toLong()
+    override fun getItemId(position: Int): Long = recuerdos[position].id
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        val imageView = (convertView as? ImageView) ?: ImageView(mContext)
+        val recuerdo = recuerdos[position]
 
-        val imageView = ImageView(mContext)
-        imageView.setImageResource(imageArray[position])
+        when (recuerdo.type) {
+            "FOTO" -> {
+                val bitmap = BitmapFactory.decodeFile(recuerdo.filePath)
+                if (bitmap != null) {
+                    imageView.setImageBitmap(bitmap)
+                } else {
+                    imageView.setImageResource(android.R.drawable.ic_menu_report_image)
+                }
+            }
+            "VIDEO" -> {
+                imageView.setImageResource(android.R.drawable.ic_media_play)
+            }
+            "AUDIO" -> {
+                imageView.setImageResource(android.R.drawable.ic_btn_speak_now)
+            }
+            else -> {
+                imageView.setImageResource(android.R.drawable.ic_menu_help)
+            }
+        }
+
         imageView.scaleType = ImageView.ScaleType.CENTER_CROP
 
         val columnCount = 3
