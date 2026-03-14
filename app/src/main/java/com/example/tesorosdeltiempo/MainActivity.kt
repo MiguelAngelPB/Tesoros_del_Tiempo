@@ -1,7 +1,6 @@
 package com.example.tesorosdeltiempo
 
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -13,6 +12,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.core.content.FileProvider
 import com.example.tesorosdeltiempo.BD.datos.RecuerdosEntity
 import com.example.tesorosdeltiempo.adaptador.GaleriaFotosAdap
 import com.example.tesorosdeltiempo.ui.RecuerdosViewModel
@@ -38,28 +38,55 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fab: FloatingActionButton
     private lateinit var galeriaAdapter: GaleriaFotosAdap
 
-    private val cameraLauncher =
+    private var pendingPhotoPath: String? = null
+
+    private val takePictureLauncher =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            val path = pendingPhotoPath
+            pendingPhotoPath = null
+            if (success && !path.isNullOrEmpty()) {
+                lifecycleScope.launch {
+                    val recuerdo = RecuerdosEntity(
+                        title = generarTituloAutomatico("Foto"),
+                        filePath = path,
+                        type = "FOTO"
+                    )
+                    viewModel.guardarRecuerdo(recuerdo)
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Foto guardada en la base de datos",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else {
+                Toast.makeText(this, "Foto cancelada", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    private val captureVideoLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
-                val bitmap = result.data?.extras?.get("data") as? Bitmap
-                if (bitmap != null) {
+                val uri = result.data?.data
+                if (uri != null) {
                     lifecycleScope.launch {
-                        val path = guardarBitmapEnFichero(bitmap, "foto")
+                        val path = copiarUriAAlmacenamientoInterno(uri, "video")
                         val recuerdo = RecuerdosEntity(
-                            title = generarTituloAutomatico("Foto"),
+                            title = generarTituloAutomatico("Video"),
                             filePath = path,
-                            type = "FOTO"
+                            type = "VIDEO"
                         )
                         viewModel.guardarRecuerdo(recuerdo)
                         Toast.makeText(
                             this@MainActivity,
-                            "Foto guardada en la base de datos",
+                            "Vídeo guardado en la base de datos",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                 } else {
-                    Toast.makeText(this, "No se pudo obtener la foto", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "No se pudo obtener el vídeo", Toast.LENGTH_SHORT).show()
                 }
+            } else {
+                Toast.makeText(this, "Vídeo cancelado", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -161,7 +188,7 @@ class MainActivity : AppCompatActivity() {
             .setTitle("Añadir recuerdo")
             .setItems(opciones) { _, which ->
                 when (which) {
-                    0 -> abrirCamara()
+                    0 -> mostrarOpcionesCamara()
                     1 -> grabarAudio()
                     2 -> seleccionarDesdeArchivos()
                 }
@@ -169,9 +196,33 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun abrirCamara() {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        cameraLauncher.launch(intent)
+    private fun mostrarOpcionesCamara() {
+        val opciones = arrayOf("Foto", "Vídeo")
+        AlertDialog.Builder(this)
+            .setTitle("Cámara")
+            .setItems(opciones) { _, which ->
+                when (which) {
+                    0 -> hacerFoto()
+                    1 -> grabarVideo()
+                }
+            }
+            .show()
+    }
+
+    private fun hacerFoto() {
+        val photoFile = File(filesDir, "foto_${System.currentTimeMillis()}.jpg")
+        pendingPhotoPath = photoFile.absolutePath
+        val uri = FileProvider.getUriForFile(
+            this,
+            "${packageName}.fileprovider",
+            photoFile
+        )
+        takePictureLauncher.launch(uri)
+    }
+
+    private fun grabarVideo() {
+        val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+        captureVideoLauncher.launch(intent)
     }
 
     private fun grabarAudio() {
@@ -182,16 +233,6 @@ class MainActivity : AppCompatActivity() {
     private fun seleccionarDesdeArchivos() {
         filePickerLauncher.launch(arrayOf("image/*", "video/*", "audio/*"))
     }
-
-    private suspend fun guardarBitmapEnFichero(bitmap: Bitmap, prefijo: String): String =
-        withContext(Dispatchers.IO) {
-            val nombre = "${prefijo}_${System.currentTimeMillis()}.jpg"
-            val fichero = File(filesDir, nombre)
-            FileOutputStream(fichero).use { out ->
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
-            }
-            fichero.absolutePath
-        }
 
     private suspend fun copiarUriAAlmacenamientoInterno(uri: Uri, prefijo: String): String =
         withContext(Dispatchers.IO) {
