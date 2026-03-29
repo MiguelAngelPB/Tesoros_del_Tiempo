@@ -7,7 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.tesorosdeltiempo.BD.datos.AppDatabase
 import com.example.tesorosdeltiempo.BD.datos.RecuerdosEntity
 import com.example.tesorosdeltiempo.BD.datos.RecuerdosRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -15,7 +17,16 @@ class RecuerdosViewModel(
     private val repository: RecuerdosRepository
 ) : ViewModel() {
 
-    val recuerdos = repository.observeRecuerdos()
+    private val filtroTags = MutableStateFlow("")
+
+    val recuerdos = filtroTags
+        .flatMapLatest { filtro ->
+            if (filtro.isBlank()) {
+                repository.observeRecuerdos()
+            } else {
+                repository.observeRecuerdosByTag(filtro.trim())
+            }
+        }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun guardarRecuerdo(recuerdo: RecuerdosEntity) {
@@ -28,6 +39,16 @@ class RecuerdosViewModel(
         viewModelScope.launch {
             repository.borrarRecuerdo(recuerdo)
         }
+    }
+
+    fun borrarRecuerdoPorId(id: Long) {
+        viewModelScope.launch {
+            repository.borrarRecuerdoPorId(id)
+        }
+    }
+
+    fun filtrarPorEtiqueta(query: String) {
+        filtroTags.value = query
     }
 }
 

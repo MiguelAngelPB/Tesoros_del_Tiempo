@@ -4,9 +4,12 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.MediaController
+import android.widget.TextView
 import android.widget.Toast
 import android.widget.VideoView
 import androidx.activity.enableEdgeToEdge
@@ -14,32 +17,56 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.media.MediaPlayer
+import com.example.tesorosdeltiempo.ui.RecuerdosViewModel
+import com.example.tesorosdeltiempo.ui.RecuerdosViewModelFactory
+import com.example.tesorosdeltiempo.ui.BarraArribaAy
+import android.view.LayoutInflater
 
 class ImagenCompleta : AppCompatActivity() {
+
+    private val viewModel: RecuerdosViewModel by viewModels {
+        RecuerdosViewModelFactory(this)
+    }
 
     private lateinit var imageView: ImageView
     private lateinit var videoView: VideoView
     private lateinit var audioButton: Button
+    private lateinit var textView: TextView
+    private lateinit var btnBorrarRecuerdo: Button
+    private lateinit var btnVerDatosRecuerdo: Button
     private var mediaPlayer: MediaPlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_imagen_completa)
+        // Barra superior fija
+        BarraArribaAy.ponerBarraArriba(this)
 
         imageView = findViewById(R.id.iv_foto)
         videoView = findViewById(R.id.vv_video)
         audioButton = findViewById(R.id.btn_audio_play_pause)
+        textView = findViewById(R.id.tv_texto_recuerdo)
+        btnBorrarRecuerdo = findViewById(R.id.btnBorrarRecuerdo)
+        btnVerDatosRecuerdo = findViewById(R.id.btnVerDatosRecuerdo)
 
         supportActionBar?.title = "Foto Completa"
 
+        val recuerdoId = intent.getLongExtra("id", -1L)
         val filePath = intent.getStringExtra("filePath")
         val type = intent.getStringExtra("type") ?: "FOTO"
+        val title = intent.getStringExtra("title").orEmpty()
+        val tags = intent.getStringExtra("tags").orEmpty()
+        val description = intent.getStringExtra("description").orEmpty()
+        val descriptionType = intent.getStringExtra("descriptionType").orEmpty()
+        val descriptionContent = intent.getStringExtra("descriptionContent").orEmpty()
+        val descriptionPath = intent.getStringExtra("descriptionPath").orEmpty()
 
         when (type) {
             "FOTO" -> {
                 audioButton.visibility = View.GONE
                 videoView.visibility = View.GONE
+                textView.visibility = View.GONE
                 imageView.visibility = View.VISIBLE
                 if (!filePath.isNullOrEmpty()) {
                     val bitmap = BitmapFactory.decodeFile(filePath)
@@ -53,6 +80,7 @@ class ImagenCompleta : AppCompatActivity() {
             }
             "VIDEO" -> {
                 audioButton.visibility = View.GONE
+                textView.visibility = View.GONE
                 imageView.visibility = View.GONE
                 videoView.visibility = View.VISIBLE
 
@@ -82,6 +110,7 @@ class ImagenCompleta : AppCompatActivity() {
             }
             "AUDIO" -> {
                 videoView.visibility = View.GONE
+                textView.visibility = View.GONE
                 imageView.visibility = View.VISIBLE
                 imageView.setImageResource(android.R.drawable.ic_btn_speak_now)
                 audioButton.visibility = View.VISIBLE
@@ -93,6 +122,90 @@ class ImagenCompleta : AppCompatActivity() {
                     toggleAudio(filePath)
                 }
             }
+            "TEXTO" -> {
+                audioButton.visibility = View.GONE
+                videoView.visibility = View.GONE
+                imageView.visibility = View.GONE
+                textView.visibility = View.VISIBLE
+                val text = intent.getStringExtra("textContent")
+                textView.text = if (text.isNullOrBlank()) {
+                    "Recuerdo de texto sin contenido."
+                } else {
+                    text
+                }
+            }
+        }
+
+        btnVerDatosRecuerdo.setOnClickListener {
+            val info = buildString {
+                append("Titulo: ").append(title.ifBlank { "(sin titulo)" }).append("\n\n")
+                append("Tipo principal: ").append(type).append("\n")
+                append("Ruta principal: ").append(filePath ?: "").append("\n\n")
+                append("Etiquetas: ").append(tags.ifBlank { "(sin etiquetas)" }).append("\n\n")
+                append("Descripcion: ").append(description.ifBlank { "(sin descripcion)" }).append("\n")
+                append("Tipo descripcion: ").append(descriptionType.ifBlank { "(sin tipo)" }).append("\n")
+                append("Texto asociado: ").append(descriptionContent.ifBlank { "(sin texto)" }).append("\n")
+                append("Ruta descripcion multimedia: ").append(descriptionPath.ifBlank { "(sin ruta)" })
+            }
+
+            // Texto + mini vista si existe descripción multimedia
+            val vista = LayoutInflater.from(this).inflate(R.layout.dialog_datos_recuerdo, null)
+            val tvDatos = vista.findViewById<TextView>(R.id.tv_datos_recuerdo)
+            val ivPreview = vista.findViewById<ImageView>(R.id.iv_preview_desc)
+
+            tvDatos.text = info
+
+            if (descriptionPath.isNotBlank()) {
+                // Si por lo que sea el tipo viene vacío, lo intento adivinar por la extensión.
+                val tipoDescReal = when {
+                    descriptionType.isNotBlank() -> descriptionType
+                    descriptionPath.endsWith(".jpg", true) || descriptionPath.endsWith(".jpeg", true) || descriptionPath.endsWith(".png", true) -> "FOTO"
+                    descriptionPath.endsWith(".mp4", true) || descriptionPath.endsWith(".3gp", true) -> "VIDEO"
+                    descriptionPath.endsWith(".m4a", true) || descriptionPath.endsWith(".mp3", true) || descriptionPath.endsWith(".wav", true) -> "AUDIO"
+                    else -> ""
+                }
+
+                when (tipoDescReal) {
+                    "FOTO" -> {
+                        val bmp = BitmapFactory.decodeFile(descriptionPath)
+                        if (bmp != null) {
+                            ivPreview.visibility = View.VISIBLE
+                            ivPreview.setImageBitmap(bmp)
+                        }
+                    }
+                    "AUDIO" -> {
+                        ivPreview.visibility = View.VISIBLE
+                        ivPreview.setImageResource(android.R.drawable.ic_btn_speak_now)
+                    }
+                    "VIDEO" -> {
+                        ivPreview.visibility = View.VISIBLE
+                        ivPreview.setImageResource(android.R.drawable.ic_media_play)
+                    }
+                }
+            }
+
+            AlertDialog.Builder(this)
+                .setTitle("Datos del recuerdo")
+                .setView(vista)
+                .setPositiveButton("Cerrar", null)
+                .show()
+        }
+
+        btnBorrarRecuerdo.setOnClickListener {
+            if (recuerdoId <= 0L) {
+                Toast.makeText(this, "No se pudo borrar este recuerdo", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            AlertDialog.Builder(this)
+                .setTitle("Borrar recuerdo")
+                .setMessage("¿Seguro que quieres borrar este recuerdo?")
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Borrar") { _, _ ->
+                    viewModel.borrarRecuerdoPorId(recuerdoId)
+                    Toast.makeText(this, "Recuerdo borrado", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+                .show()
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->

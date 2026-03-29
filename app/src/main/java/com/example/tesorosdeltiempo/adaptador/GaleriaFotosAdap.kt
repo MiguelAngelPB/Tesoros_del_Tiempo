@@ -43,6 +43,9 @@ class GaleriaFotosAdap(private val mContext: Context) : BaseAdapter() {
             "AUDIO" -> {
                 imageView.setImageResource(android.R.drawable.ic_btn_speak_now)
             }
+            "TEXTO" -> {
+                imageView.setImageResource(android.R.drawable.ic_menu_edit)
+            }
             else -> {
                 imageView.setImageResource(android.R.drawable.ic_menu_help)
             }

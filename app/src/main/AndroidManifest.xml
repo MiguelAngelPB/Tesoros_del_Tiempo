@@ -25,6 +25,14 @@
         </provider>
 
         <activity
+            android:name=".AjustesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TesorosDelTiempo" />
+        <activity
+            android:name=".NuevoRecuerdoActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TesorosDelTiempo" />
+        <activity
             android:name=".ImagenCompleta"
             android:exported="false"
             android:label="@string/title_activity_imagen_completa"
