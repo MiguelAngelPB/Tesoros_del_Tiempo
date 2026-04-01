@@ -147,13 +147,22 @@ class ImagenCompleta : AppCompatActivity() {
                 append("Texto asociado: ").append(descriptionContent.ifBlank { "(sin texto)" }).append("\n")
                 append("Ruta descripcion multimedia: ").append(descriptionPath.ifBlank { "(sin ruta)" })
             }
-
             // Texto + mini vista si existe descripción multimedia
             val vista = LayoutInflater.from(this).inflate(R.layout.dialog_datos_recuerdo, null)
             val tvDatos = vista.findViewById<TextView>(R.id.tv_datos_recuerdo)
             val ivPreview = vista.findViewById<ImageView>(R.id.iv_preview_desc)
+            val vvPreview = vista.findViewById<VideoView>(R.id.vv_preview_desc)
+            val btnPlayPausa = vista.findViewById<Button>(R.id.btn_play_pausa_desc)
 
             tvDatos.text = info
+
+            var reproductorAudioDesc: MediaPlayer? = null
+            fun pararAudioDesc() {
+                try {
+                    reproductorAudioDesc?.release()
+                } catch (_: Exception) { }
+                reproductorAudioDesc = null
+            }
 
             if (descriptionPath.isNotBlank()) {
                 // Si por lo que sea el tipo viene vacío, lo intento adivinar por la extensión.
@@ -176,19 +185,76 @@ class ImagenCompleta : AppCompatActivity() {
                     "AUDIO" -> {
                         ivPreview.visibility = View.VISIBLE
                         ivPreview.setImageResource(android.R.drawable.ic_btn_speak_now)
+                        btnPlayPausa.visibility = View.VISIBLE
+                        btnPlayPausa.text = "Reproducir descripción"
+
+                        btnPlayPausa.setOnClickListener {
+                            val mp = reproductorAudioDesc
+                            if (mp == null) {
+                                val nuevo = MediaPlayer()
+                                nuevo.setDataSource(descriptionPath)
+                                nuevo.setOnPreparedListener {
+                                    btnPlayPausa.text = "Pausar descripción"
+                                    it.start()
+                                }
+                                nuevo.setOnCompletionListener {
+                                    btnPlayPausa.text = "Reproducir descripción"
+                                    pararAudioDesc()
+                                }
+                                nuevo.prepareAsync()
+                                reproductorAudioDesc = nuevo
+                            } else {
+                                if (mp.isPlaying) {
+                                    mp.pause()
+                                    btnPlayPausa.text = "Reproducir descripción"
+                                } else {
+                                    mp.start()
+                                    btnPlayPausa.text = "Pausar descripción"
+                                }
+                            }
+                        }
                     }
                     "VIDEO" -> {
-                        ivPreview.visibility = View.VISIBLE
-                        ivPreview.setImageResource(android.R.drawable.ic_media_play)
+                        vvPreview.visibility = View.VISIBLE
+
+                        val uri = Uri.fromFile(java.io.File(descriptionPath))
+                        val controller = MediaController(this)
+                        controller.setAnchorView(vvPreview)
+                        vvPreview.setMediaController(controller)
+                        vvPreview.setVideoURI(uri)
+                        vvPreview.setOnPreparedListener {
+                            it.isLooping = true
+                            vvPreview.start()
+                        }
+
+                        btnPlayPausa.visibility = View.VISIBLE
+                        btnPlayPausa.text = "Pausar descripción"
+                        btnPlayPausa.setOnClickListener {
+                            if (vvPreview.isPlaying) {
+                                vvPreview.pause()
+                                btnPlayPausa.text = "Reproducir descripción"
+                            } else {
+                                vvPreview.start()
+                                btnPlayPausa.text = "Pausar descripción"
+                            }
+                        }
                     }
                 }
             }
 
-            AlertDialog.Builder(this)
+            val dialogo = AlertDialog.Builder(this)
                 .setTitle("Datos del recuerdo")
                 .setView(vista)
                 .setPositiveButton("Cerrar", null)
-                .show()
+                .create()
+
+            dialogo.setOnDismissListener {
+                // Cuando cierro el popup, paro lo que esté sonando/reproduciéndose
+                try { vvPreview.stopPlayback() } catch (_: Exception) { }
+                pararAudioDesc()
+            }
+
+            dialogo.show()
         }
 
         btnBorrarRecuerdo.setOnClickListener {

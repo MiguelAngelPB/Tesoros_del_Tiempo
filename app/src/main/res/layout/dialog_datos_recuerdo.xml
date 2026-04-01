@@ -9,9 +9,23 @@
     <ImageView
         android:id="@+id/iv_preview_desc"
         android:layout_width="match_parent"
-        android:layout_height="160dp"
-        android:scaleType="centerCrop"
+        android:layout_height="220dp"
+        android:scaleType="fitCenter"
         android:visibility="gone" />
+
+    <VideoView
+        android:id="@+id/vv_preview_desc"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btn_play_pausa_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reproducir descripción"
+        android:visibility="gone"
+        android:layout_marginTop="8dp" />
 
     <TextView
         android:id="@+id/tv_datos_recuerdo"
@@ -21,3 +35,4 @@
         android:textSize="14sp" />
 
 </LinearLayout>
+
