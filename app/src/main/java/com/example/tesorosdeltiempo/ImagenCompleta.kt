@@ -40,7 +40,6 @@ class ImagenCompleta : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_imagen_completa)
-        // Barra superior fija
         BarraArribaAy.ponerBarraArriba(this)
 
         imageView = findViewById(R.id.iv_foto)
@@ -57,7 +56,6 @@ class ImagenCompleta : AppCompatActivity() {
         val type = intent.getStringExtra("type") ?: "FOTO"
         val title = intent.getStringExtra("title").orEmpty()
         val tags = intent.getStringExtra("tags").orEmpty()
-        val description = intent.getStringExtra("description").orEmpty()
         val descriptionType = intent.getStringExtra("descriptionType").orEmpty()
         val descriptionContent = intent.getStringExtra("descriptionContent").orEmpty()
         val descriptionPath = intent.getStringExtra("descriptionPath").orEmpty()
@@ -137,24 +135,25 @@ class ImagenCompleta : AppCompatActivity() {
         }
 
         btnVerDatosRecuerdo.setOnClickListener {
-            val info = buildString {
-                append("Titulo: ").append(title.ifBlank { "(sin titulo)" }).append("\n\n")
-                append("Tipo principal: ").append(type).append("\n")
-                append("Ruta principal: ").append(filePath ?: "").append("\n\n")
-                append("Etiquetas: ").append(tags.ifBlank { "(sin etiquetas)" }).append("\n\n")
-                append("Descripcion: ").append(description.ifBlank { "(sin descripcion)" }).append("\n")
-                append("Tipo descripcion: ").append(descriptionType.ifBlank { "(sin tipo)" }).append("\n")
-                append("Texto asociado: ").append(descriptionContent.ifBlank { "(sin texto)" }).append("\n")
-                append("Ruta descripcion multimedia: ").append(descriptionPath.ifBlank { "(sin ruta)" })
+            val textoParaPersona = buildString {
+                append(title.trim().ifBlank { "Sin título" })
+                if (tags.isNotBlank()) {
+                    append("\n\n")
+                    append(tags.trim())
+                }
+                if (descriptionContent.isNotBlank()) {
+                    append("\n\n")
+                    append(descriptionContent.trim())
+                }
             }
-            // Texto + mini vista si existe descripción multimedia
+
             val vista = LayoutInflater.from(this).inflate(R.layout.dialog_datos_recuerdo, null)
             val tvDatos = vista.findViewById<TextView>(R.id.tv_datos_recuerdo)
             val ivPreview = vista.findViewById<ImageView>(R.id.iv_preview_desc)
             val vvPreview = vista.findViewById<VideoView>(R.id.vv_preview_desc)
             val btnPlayPausa = vista.findViewById<Button>(R.id.btn_play_pausa_desc)
 
-            tvDatos.text = info
+            tvDatos.text = textoParaPersona
 
             var reproductorAudioDesc: MediaPlayer? = null
             fun pararAudioDesc() {
@@ -165,7 +164,6 @@ class ImagenCompleta : AppCompatActivity() {
             }
 
             if (descriptionPath.isNotBlank()) {
-                // Si por lo que sea el tipo viene vacío, lo intento adivinar por la extensión.
                 val tipoDescReal = when {
                     descriptionType.isNotBlank() -> descriptionType
                     descriptionPath.endsWith(".jpg", true) || descriptionPath.endsWith(".jpeg", true) || descriptionPath.endsWith(".png", true) -> "FOTO"
@@ -186,7 +184,7 @@ class ImagenCompleta : AppCompatActivity() {
                         ivPreview.visibility = View.VISIBLE
                         ivPreview.setImageResource(android.R.drawable.ic_btn_speak_now)
                         btnPlayPausa.visibility = View.VISIBLE
-                        btnPlayPausa.text = "Reproducir descripción"
+                        btnPlayPausa.text = "Escuchar"
 
                         btnPlayPausa.setOnClickListener {
                             val mp = reproductorAudioDesc
@@ -194,11 +192,11 @@ class ImagenCompleta : AppCompatActivity() {
                                 val nuevo = MediaPlayer()
                                 nuevo.setDataSource(descriptionPath)
                                 nuevo.setOnPreparedListener {
-                                    btnPlayPausa.text = "Pausar descripción"
+                                    btnPlayPausa.text = "Pausar"
                                     it.start()
                                 }
                                 nuevo.setOnCompletionListener {
-                                    btnPlayPausa.text = "Reproducir descripción"
+                                    btnPlayPausa.text = "Escuchar"
                                     pararAudioDesc()
                                 }
                                 nuevo.prepareAsync()
@@ -206,10 +204,10 @@ class ImagenCompleta : AppCompatActivity() {
                             } else {
                                 if (mp.isPlaying) {
                                     mp.pause()
-                                    btnPlayPausa.text = "Reproducir descripción"
+                                    btnPlayPausa.text = "Escuchar"
                                 } else {
                                     mp.start()
-                                    btnPlayPausa.text = "Pausar descripción"
+                                    btnPlayPausa.text = "Pausar"
                                 }
                             }
                         }
@@ -228,14 +226,14 @@ class ImagenCompleta : AppCompatActivity() {
                         }
 
                         btnPlayPausa.visibility = View.VISIBLE
-                        btnPlayPausa.text = "Pausar descripción"
+                        btnPlayPausa.text = "Pausar"
                         btnPlayPausa.setOnClickListener {
                             if (vvPreview.isPlaying) {
                                 vvPreview.pause()
-                                btnPlayPausa.text = "Reproducir descripción"
+                                btnPlayPausa.text = "Ver vídeo"
                             } else {
                                 vvPreview.start()
-                                btnPlayPausa.text = "Pausar descripción"
+                                btnPlayPausa.text = "Pausar"
                             }
                         }
                     }
@@ -243,13 +241,12 @@ class ImagenCompleta : AppCompatActivity() {
             }
 
             val dialogo = AlertDialog.Builder(this)
-                .setTitle("Datos del recuerdo")
+                .setTitle("Te acuerdas…")
                 .setView(vista)
                 .setPositiveButton("Cerrar", null)
                 .create()
 
             dialogo.setOnDismissListener {
-                // Cuando cierro el popup, paro lo que esté sonando/reproduciéndose
                 try { vvPreview.stopPlayback() } catch (_: Exception) { }
                 pararAudioDesc()
             }

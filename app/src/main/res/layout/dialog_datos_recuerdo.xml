@@ -1,38 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="20dp">
 
     <ImageView
         android:id="@+id/iv_preview_desc"
         android:layout_width="match_parent"
-        android:layout_height="220dp"
+        android:layout_height="300dp"
         android:scaleType="fitCenter"
         android:visibility="gone" />
 
     <VideoView
         android:id="@+id/vv_preview_desc"
         android:layout_width="match_parent"
-        android:layout_height="220dp"
+        android:layout_height="300dp"
         android:visibility="gone" />
 
     <Button
         android:id="@+id/btn_play_pausa_desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Reproducir descripción"
+        android:minHeight="56dp"
+        android:text="Escuchar"
+        android:textSize="18sp"
         android:visibility="gone"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="12dp" />
 
-    <TextView
-        android:id="@+id/tv_datos_recuerdo"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:textSize="14sp" />
+        android:layout_marginTop="16dp"
+        android:fillViewport="true">
+
+        <TextView
+            android:id="@+id/tv_datos_recuerdo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:lineSpacingMultiplier="1.15"
+            android:textColor="@android:color/black" />
+    </ScrollView>
 
 </LinearLayout>
-
