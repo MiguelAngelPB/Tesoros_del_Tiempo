@@ -8,6 +8,8 @@ import android.widget.AbsListView
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import com.example.tesorosdeltiempo.BD.datos.RecuerdosEntity
+import com.example.tesorosdeltiempo.seguridad.AyArchivoSeguro
+import java.io.File
 
 class GaleriaFotosAdap(private val mContext: Context) : BaseAdapter() {
 
@@ -30,7 +32,22 @@ class GaleriaFotosAdap(private val mContext: Context) : BaseAdapter() {
 
         when (recuerdo.type) {
             "FOTO" -> {
-                val bitmap = BitmapFactory.decodeFile(recuerdo.filePath)
+                val bitmap = if (AyArchivoSeguro.esRutaArchivoCifrado(recuerdo.filePath)) {
+                    var tempFile: File? = null
+                    try {
+                        tempFile = AyArchivoSeguro.descifrarAFicheroTemporal(
+                            mContext,
+                            recuerdo.filePath,
+                            "thumb",
+                            ".jpg"
+                        )
+                        BitmapFactory.decodeFile(tempFile!!.absolutePath)
+                    } finally {
+                        try { tempFile?.delete() } catch (_: Exception) { }
+                    }
+                } else {
+                    BitmapFactory.decodeFile(recuerdo.filePath)
+                }
                 if (bitmap != null) {
                     imageView.setImageBitmap(bitmap)
                 } else {

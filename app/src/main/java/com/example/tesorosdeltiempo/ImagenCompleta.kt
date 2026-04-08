@@ -20,7 +20,9 @@ import android.media.MediaPlayer
 import com.example.tesorosdeltiempo.ui.RecuerdosViewModel
 import com.example.tesorosdeltiempo.ui.RecuerdosViewModelFactory
 import com.example.tesorosdeltiempo.ui.BarraArribaAy
+import com.example.tesorosdeltiempo.seguridad.AyArchivoSeguro
 import android.view.LayoutInflater
+import java.io.File
 
 class ImagenCompleta : AppCompatActivity() {
 
@@ -35,6 +37,7 @@ class ImagenCompleta : AppCompatActivity() {
     private lateinit var btnBorrarRecuerdo: Button
     private lateinit var btnVerDatosRecuerdo: Button
     private var mediaPlayer: MediaPlayer? = null
+    private var tempMainFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,12 +70,30 @@ class ImagenCompleta : AppCompatActivity() {
                 textView.visibility = View.GONE
                 imageView.visibility = View.VISIBLE
                 if (!filePath.isNullOrEmpty()) {
-                    val bitmap = BitmapFactory.decodeFile(filePath)
-                    if (bitmap != null) {
-                        imageView.setImageBitmap(bitmap)
-                    } else {
-                        Toast.makeText(this, "No se pudo cargar la imagen", Toast.LENGTH_SHORT)
+                    var tempFile: File? = null
+                    try {
+                        val rutaParaDecodificar = if (AyArchivoSeguro.esRutaArchivoCifrado(filePath)) {
+                            tempFile = AyArchivoSeguro.descifrarAFicheroTemporal(this, filePath, "foto", ".jpg")
+                            tempFile!!.absolutePath
+                        } else {
+                            filePath
+                        }
+
+                        val bitmap = BitmapFactory.decodeFile(rutaParaDecodificar)
+                        if (bitmap != null) {
+                            imageView.setImageBitmap(bitmap)
+                        } else {
+                            Toast.makeText(
+                                this,
+                                "No se pudo cargar la imagen",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    } catch (_: Exception) {
+                        Toast.makeText(this, "No se pudo descifrar la imagen", Toast.LENGTH_SHORT)
                             .show()
+                    } finally {
+                        try { tempFile?.delete() } catch (_: Exception) { }
                     }
                 }
             }
@@ -83,7 +104,14 @@ class ImagenCompleta : AppCompatActivity() {
                 videoView.visibility = View.VISIBLE
 
                 if (!filePath.isNullOrEmpty()) {
-                    val uri = Uri.fromFile(java.io.File(filePath))
+                    val rutaVideo = if (AyArchivoSeguro.esRutaArchivoCifrado(filePath)) {
+                        tempMainFile = AyArchivoSeguro.descifrarAFicheroTemporal(this, filePath, "video", ".mp4")
+                        tempMainFile!!.absolutePath
+                    } else {
+                        filePath
+                    }
+
+                    val uri = Uri.fromFile(File(rutaVideo))
 
                     val controller = MediaController(this)
                     controller.setAnchorView(videoView)
@@ -117,7 +145,15 @@ class ImagenCompleta : AppCompatActivity() {
                         Toast.makeText(this, "Audio no disponible", Toast.LENGTH_SHORT).show()
                         return@setOnClickListener
                     }
-                    toggleAudio(filePath)
+                    val rutaAudio = if (AyArchivoSeguro.esRutaArchivoCifrado(filePath)) {
+                        if (tempMainFile == null) {
+                            tempMainFile = AyArchivoSeguro.descifrarAFicheroTemporal(this, filePath, "audio", ".m4a")
+                        }
+                        tempMainFile!!.absolutePath
+                    } else {
+                        filePath
+                    }
+                    toggleAudio(rutaAudio)
                 }
             }
             "TEXTO" -> {
@@ -155,6 +191,8 @@ class ImagenCompleta : AppCompatActivity() {
 
             tvDatos.text = textoParaPersona
 
+            var tempDescFile: File? = null
+
             var reproductorAudioDesc: MediaPlayer? = null
             fun pararAudioDesc() {
                 try {
@@ -164,17 +202,45 @@ class ImagenCompleta : AppCompatActivity() {
             }
 
             if (descriptionPath.isNotBlank()) {
+                val pathParaTipo = if (AyArchivoSeguro.esRutaArchivoCifrado(descriptionPath)) {
+                    descriptionPath.removeSuffix(".enc")
+                } else {
+                    descriptionPath
+                }
+
                 val tipoDescReal = when {
                     descriptionType.isNotBlank() -> descriptionType
-                    descriptionPath.endsWith(".jpg", true) || descriptionPath.endsWith(".jpeg", true) || descriptionPath.endsWith(".png", true) -> "FOTO"
-                    descriptionPath.endsWith(".mp4", true) || descriptionPath.endsWith(".3gp", true) -> "VIDEO"
-                    descriptionPath.endsWith(".m4a", true) || descriptionPath.endsWith(".mp3", true) || descriptionPath.endsWith(".wav", true) -> "AUDIO"
+                    pathParaTipo.endsWith(".jpg", true) || pathParaTipo.endsWith(".jpeg", true) || pathParaTipo.endsWith(".png", true) -> "FOTO"
+                    pathParaTipo.endsWith(".mp4", true) || pathParaTipo.endsWith(".3gp", true) -> "VIDEO"
+                    pathParaTipo.endsWith(".m4a", true) || pathParaTipo.endsWith(".mp3", true) || pathParaTipo.endsWith(".wav", true) -> "AUDIO"
                     else -> ""
+                }
+
+                val extTemp = when (tipoDescReal) {
+                    "FOTO" -> ".jpg"
+                    "VIDEO" -> ".mp4"
+                    "AUDIO" -> ".m4a"
+                    else -> ""
+                }
+
+                val descriptionPathReal = if (
+                    AyArchivoSeguro.esRutaArchivoCifrado(descriptionPath) &&
+                    extTemp.isNotBlank()
+                ) {
+                    tempDescFile = AyArchivoSeguro.descifrarAFicheroTemporal(
+                        this,
+                        descriptionPath,
+                        "desc",
+                        extTemp
+                    )
+                    tempDescFile!!.absolutePath
+                } else {
+                    descriptionPath
                 }
 
                 when (tipoDescReal) {
                     "FOTO" -> {
-                        val bmp = BitmapFactory.decodeFile(descriptionPath)
+                        val bmp = BitmapFactory.decodeFile(descriptionPathReal)
                         if (bmp != null) {
                             ivPreview.visibility = View.VISIBLE
                             ivPreview.setImageBitmap(bmp)
@@ -190,7 +256,7 @@ class ImagenCompleta : AppCompatActivity() {
                             val mp = reproductorAudioDesc
                             if (mp == null) {
                                 val nuevo = MediaPlayer()
-                                nuevo.setDataSource(descriptionPath)
+                                nuevo.setDataSource(descriptionPathReal)
                                 nuevo.setOnPreparedListener {
                                     btnPlayPausa.text = "Pausar"
                                     it.start()
@@ -215,7 +281,7 @@ class ImagenCompleta : AppCompatActivity() {
                     "VIDEO" -> {
                         vvPreview.visibility = View.VISIBLE
 
-                        val uri = Uri.fromFile(java.io.File(descriptionPath))
+                        val uri = Uri.fromFile(java.io.File(descriptionPathReal))
                         val controller = MediaController(this)
                         controller.setAnchorView(vvPreview)
                         vvPreview.setMediaController(controller)
@@ -249,6 +315,8 @@ class ImagenCompleta : AppCompatActivity() {
             dialogo.setOnDismissListener {
                 try { vvPreview.stopPlayback() } catch (_: Exception) { }
                 pararAudioDesc()
+                try { tempDescFile?.delete() } catch (_: Exception) { }
+                tempDescFile = null
             }
 
             dialogo.show()
@@ -292,6 +360,8 @@ class ImagenCompleta : AppCompatActivity() {
                 it.reset()
                 it.release()
                 mediaPlayer = null
+                try { tempMainFile?.delete() } catch (_: Exception) { }
+                tempMainFile = null
             }
             nuevo.prepareAsync()
             mediaPlayer = nuevo
@@ -311,5 +381,7 @@ class ImagenCompleta : AppCompatActivity() {
         super.onStop()
         mediaPlayer?.release()
         mediaPlayer = null
+        try { tempMainFile?.delete() } catch (_: Exception) { }
+        tempMainFile = null
     }
 }
