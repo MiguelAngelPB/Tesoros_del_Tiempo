@@ -13,12 +13,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+// Capa entre las pantallas yel  repositorio con operaciones en segundo plano.
 class RecuerdosViewModel(
     private val repository: RecuerdosRepository
 ) : ViewModel() {
 
     private val filtroTags = MutableStateFlow("")
 
+    // Galería principal
     val recuerdos = filtroTags
         .flatMapLatest { filtro ->
             if (filtro.isBlank()) {
@@ -27,6 +29,10 @@ class RecuerdosViewModel(
                 repository.observeRecuerdosByTag(filtro.trim())
             }
         }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    // Solo ítems con enPapelera = true
+    val papelera = repository.observePapelera()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun guardarRecuerdo(recuerdo: RecuerdosEntity) {
@@ -47,11 +53,42 @@ class RecuerdosViewModel(
         }
     }
 
+    fun moverRecuerdoAPapeleraPorId(id: Long) {
+        viewModelScope.launch {
+            repository.moverRecuerdoAPapeleraPorId(id)
+        }
+    }
+
+    fun restaurarDesdePapeleraPorId(id: Long) {
+        viewModelScope.launch {
+            repository.restaurarDesdePapeleraPorId(id)
+        }
+    }
+
+    fun eliminarDefinitivoDesdePapeleraPorId(id: Long) {
+        viewModelScope.launch {
+            repository.eliminarDefinitivoDesdePapeleraPorId(id)
+        }
+    }
+
+    fun restaurarTodoDesdePapelera() {
+        viewModelScope.launch {
+            repository.restaurarTodoDesdePapelera()
+        }
+    }
+
+    fun vaciarPapeleraDefinitivo() {
+        viewModelScope.launch {
+            repository.vaciarPapeleraDefinitivo()
+        }
+    }
+
     fun filtrarPorEtiqueta(query: String) {
         filtroTags.value = query
     }
 }
 
+// Crea el ViewModel con el repositorio ya montado con Room
 class RecuerdosViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val db = AppDatabase.getInstance(context)
@@ -60,4 +97,3 @@ class RecuerdosViewModelFactory(private val context: Context) : ViewModelProvide
         return RecuerdosViewModel(repo) as T
     }
 }
-

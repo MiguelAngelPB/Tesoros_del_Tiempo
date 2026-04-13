@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// Formulario para crear un recuerdo
 class NuevoRecuerdoActivity : AppCompatActivity() {
 
     private val viewModel: RecuerdosViewModel by viewModels {
@@ -44,6 +45,7 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
     private var selectedDescriptionPath: String? = null
     private var selectedDescriptionType: String? = null
 
+    // Foto con TakePicture
     private val takePictureLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             val path = pendingPhotoPath
@@ -55,6 +57,7 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
             }
         }
 
+    // Vídeo
     private val videoLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
@@ -67,6 +70,7 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
             }
         }
 
+    // Audio grabado o elegido
     private val audioLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
@@ -79,6 +83,7 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
             }
         }
 
+    // Elegir archivo (imagen, vídeo o audio) como contenido principal
     private val archivoLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri != null) {
@@ -98,6 +103,7 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
             }
         }
 
+    // Adjunto opcional
     private val descripcionMultimediaLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri != null) {
@@ -145,6 +151,7 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
         }
     }
 
+    // Cámara escribe en un File temporal y FileProvider da el Uri al sistema
     private fun hacerFoto() {
         val photoFile = File(filesDir, "foto_${System.currentTimeMillis()}.jpg")
         pendingPhotoPath = photoFile.absolutePath
@@ -164,12 +171,14 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
         audioLauncher.launch(Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION))
     }
 
+    // Recuerdo solo texto
     private fun usarTextoComoPrincipal() {
         selectedMainType = "TEXTO"
         selectedMainPath = ""
         actualizarResumen()
     }
 
+    // Texto de ayuda bajo el formulario con lo seleccionado hasta ahora
     private fun actualizarResumen() {
         val principal = if (!selectedMainType.isNullOrEmpty()) {
             "Principal: $selectedMainType"
@@ -184,6 +193,7 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
         tvResumenAdjuntos.text = "$principal\n$descripcion"
     }
 
+    // Comprueba que hay tipo principal
     private fun guardarRecuerdo() {
         val tipoPrincipal = selectedMainType
         if (tipoPrincipal.isNullOrBlank()) {
@@ -204,17 +214,18 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
         finish()
     }
 
+    // Arma la fila Room a partir de los campos del formulario y adjuntos
     private fun construirRecuerdo(tipoPrincipal: String, rutaPrincipal: String): RecuerdosEntity {
         val titulo = etTitulo.text?.toString()?.trim().orEmpty()
         val tags = etTags.text?.toString()?.trim().orEmpty()
         val textoDesc = etDescripcionTexto.text?.toString()?.trim().orEmpty()
-
 
         return RecuerdosEntity(
             title = if (titulo.isBlank()) generarTituloAutomatico(tipoPrincipal) else titulo,
             filePath = rutaPrincipal,
             type = tipoPrincipal,
             tags = tags,
+            enPapelera = false,
             // Description de texto
             description = textoDesc.ifBlank { null },
             // Esto es solo para el archivo adjunto de la descripción si existe
@@ -225,6 +236,7 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
         )
     }
 
+    // Copia bytes de un a filesDir
     private suspend fun copiarUriAInterno(uri: Uri, prefijo: String): String =
         withContext(Dispatchers.IO) {
             val extension = when {

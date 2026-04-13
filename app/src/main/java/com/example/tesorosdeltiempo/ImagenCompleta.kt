@@ -24,6 +24,7 @@ import com.example.tesorosdeltiempo.seguridad.AyArchivoSeguro
 import android.view.LayoutInflater
 import java.io.File
 
+// Detalle de un recuerdo que muestra multimedia o texto, información del recuerdo con "Te acuerdas…" y envío a la papelera
 class ImagenCompleta : AppCompatActivity() {
 
     private val viewModel: RecuerdosViewModel by viewModels {
@@ -43,6 +44,7 @@ class ImagenCompleta : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_imagen_completa)
+
         BarraArribaAy.ponerBarraArriba(this)
 
         imageView = findViewById(R.id.iv_foto)
@@ -54,6 +56,7 @@ class ImagenCompleta : AppCompatActivity() {
 
         supportActionBar?.title = "Foto Completa"
 
+        // Datos del recuerdo
         val recuerdoId = intent.getLongExtra("id", -1L)
         val filePath = intent.getStringExtra("filePath")
         val type = intent.getStringExtra("type") ?: "FOTO"
@@ -63,6 +66,7 @@ class ImagenCompleta : AppCompatActivity() {
         val descriptionContent = intent.getStringExtra("descriptionContent").orEmpty()
         val descriptionPath = intent.getStringExtra("descriptionPath").orEmpty()
 
+        // Contenido principal
         when (type) {
             "FOTO" -> {
                 audioButton.visibility = View.GONE
@@ -72,6 +76,7 @@ class ImagenCompleta : AppCompatActivity() {
                 if (!filePath.isNullOrEmpty()) {
                     var tempFile: File? = null
                     try {
+                        // Si el fichero está cifrado (.enc), descifro a temporal solo para decodificar
                         val rutaParaDecodificar = if (AyArchivoSeguro.esRutaArchivoCifrado(filePath)) {
                             tempFile = AyArchivoSeguro.descifrarAFicheroTemporal(this, filePath, "foto", ".jpg")
                             tempFile!!.absolutePath
@@ -104,6 +109,7 @@ class ImagenCompleta : AppCompatActivity() {
                 videoView.visibility = View.VISIBLE
 
                 if (!filePath.isNullOrEmpty()) {
+                    // VideoView si está cifrado dejo temporal hasta onStop
                     val rutaVideo = if (AyArchivoSeguro.esRutaArchivoCifrado(filePath)) {
                         tempMainFile = AyArchivoSeguro.descifrarAFicheroTemporal(this, filePath, "video", ".mp4")
                         tempMainFile!!.absolutePath
@@ -170,6 +176,7 @@ class ImagenCompleta : AppCompatActivity() {
             }
         }
 
+        // Diálogo "Te acuerdas…"
         btnVerDatosRecuerdo.setOnClickListener {
             val textoParaPersona = buildString {
                 append(title.trim().ifBlank { "Sin título" })
@@ -202,6 +209,7 @@ class ImagenCompleta : AppCompatActivity() {
             }
 
             if (descriptionPath.isNotBlank()) {
+                // Quito .enc solo para adivinar extensión si hace falta
                 val pathParaTipo = if (AyArchivoSeguro.esRutaArchivoCifrado(descriptionPath)) {
                     descriptionPath.removeSuffix(".enc")
                 } else {
@@ -322,23 +330,25 @@ class ImagenCompleta : AppCompatActivity() {
             dialogo.show()
         }
 
+        // Marca enPapelera para que el cuidador gestione en Ajustes
         btnBorrarRecuerdo.setOnClickListener {
             if (recuerdoId <= 0L) {
                 Toast.makeText(this, "No se pudo borrar este recuerdo", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             AlertDialog.Builder(this)
-                .setTitle("Borrar recuerdo")
-                .setMessage("¿Seguro que quieres borrar este recuerdo?")
+                .setTitle("Enviar a la papelera")
+                .setMessage("El recuerdo pasará a la papelera. El cuidador podrá restaurarlo o borrarlo definitivamente desde Ajustes.")
                 .setNegativeButton("Cancelar", null)
-                .setPositiveButton("Borrar") { _, _ ->
-                    viewModel.borrarRecuerdoPorId(recuerdoId)
-                    Toast.makeText(this, "Recuerdo borrado", Toast.LENGTH_SHORT).show()
+                .setPositiveButton("A la papelera") { _, _ ->
+                    viewModel.moverRecuerdoAPapeleraPorId(recuerdoId)
+                    Toast.makeText(this, "Recuerdo en la papelera", Toast.LENGTH_SHORT).show()
                     finish()
                 }
                 .show()
         }
 
+        // Márgenes seguros con barras del sistema
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -346,6 +356,7 @@ class ImagenCompleta : AppCompatActivity() {
         }
     }
 
+    // Reproduce o pausa el audio principal con un solo MediaPlayer
     private fun toggleAudio(filePath: String) {
         val mp = mediaPlayer
         if (mp == null) {

@@ -11,6 +11,7 @@ import com.example.tesorosdeltiempo.BD.datos.RecuerdosEntity
 import com.example.tesorosdeltiempo.seguridad.AyArchivoSeguro
 import java.io.File
 
+// Miniaturas del GridView principal con foto decodificada o icono según el tipo
 class GaleriaFotosAdap(private val mContext: Context) : BaseAdapter() {
 
     private var recuerdos: List<RecuerdosEntity> = emptyList()

@@ -25,6 +25,11 @@
         </provider>
 
         <activity
+            android:name=".PapeleraActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TesorosDelTiempo"
+            android:parentActivityName=".AjustesActivity" />
+        <activity
             android:name=".AjustesActivity"
             android:exported="false"
             android:theme="@style/Theme.TesorosDelTiempo" />

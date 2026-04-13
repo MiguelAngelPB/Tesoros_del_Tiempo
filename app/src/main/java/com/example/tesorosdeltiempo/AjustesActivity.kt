@@ -1,7 +1,9 @@
 package com.example.tesorosdeltiempo
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -12,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.tesorosdeltiempo.seguridad.CuidadorAuthManager
 import com.example.tesorosdeltiempo.ui.BarraArribaAy
 
+// Ajustes login/registro cuidador, papelera (solo con sesión) y barra
 class AjustesActivity : AppCompatActivity() {
 
     private lateinit var auth: CuidadorAuthManager
@@ -19,6 +22,7 @@ class AjustesActivity : AppCompatActivity() {
     private lateinit var btnLoginCuidador: Button
     private lateinit var btnRegistroCuidador: Button
     private lateinit var btnLogoutCuidador: Button
+    private lateinit var btnPapelera: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,11 +30,18 @@ class AjustesActivity : AppCompatActivity() {
         // Barra superior fija
         BarraArribaAy.ponerBarraArriba(this)
 
+        // Gestión de credenciales cifradas del cuidador
         auth = CuidadorAuthManager(this)
         tvEstadoCuidador = findViewById(R.id.tvEstadoCuidador)
         btnLoginCuidador = findViewById(R.id.btnLoginCuidador)
         btnRegistroCuidador = findViewById(R.id.btnRegistroCuidador)
         btnLogoutCuidador = findViewById(R.id.btnLogoutCuidador)
+        btnPapelera = findViewById(R.id.btnPapelera)
+
+        // Papelera solo con el cuidador conectado (se oculta si no)
+        btnPapelera.setOnClickListener {
+            startActivity(Intent(this, PapeleraActivity::class.java))
+        }
 
         btnLoginCuidador.setOnClickListener {
             mostrarDialogoAuth(modo = ModoAuth.LOGIN)
@@ -49,6 +60,13 @@ class AjustesActivity : AppCompatActivity() {
         actualizarEstadoUI()
     }
 
+    // Al volver a la pantalla, refresco botones y texto
+    override fun onResume() {
+        super.onResume()
+        actualizarEstadoUI()
+    }
+
+    // Texto de estado y qué botones se muestran según la sesión
     private fun actualizarEstadoUI() {
         val loggedIn = auth.estaConectado()
 
@@ -65,13 +83,14 @@ class AjustesActivity : AppCompatActivity() {
         btnLoginCuidador.alpha = if (showLoginRegistro) 1f else 0.5f
         btnRegistroCuidador.alpha = if (showLoginRegistro) 1f else 0.5f
 
-        btnLogoutCuidador.visibility = if (loggedIn) android.view.View.VISIBLE else android.view.View.GONE
+        btnLogoutCuidador.visibility = if (loggedIn) View.VISIBLE else View.GONE
+        btnPapelera.visibility = if (loggedIn) View.VISIBLE else View.GONE
     }
 
     private enum class ModoAuth { LOGIN, REGISTRO }
 
+    // Diálogo login o registro con usuario y contraseña
     private fun mostrarDialogoAuth(modo: ModoAuth) {
-        // Layout
         val contenedor = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(32, 24, 32, 0)

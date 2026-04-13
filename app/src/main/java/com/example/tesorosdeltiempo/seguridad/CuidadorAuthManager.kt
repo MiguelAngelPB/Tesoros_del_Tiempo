@@ -69,6 +69,7 @@ class CuidadorAuthManager(contexto: Context) {
         }
     }
 
+    // Apaga el flag pero no borra usuario guardado (así puede volver a entrar)
     fun cerrarSesion() {
         preferenciasCifradas.edit().putBoolean(claveSesionIniciada, false).apply()
     }

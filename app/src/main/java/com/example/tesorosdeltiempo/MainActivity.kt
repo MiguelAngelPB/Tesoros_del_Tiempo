@@ -15,6 +15,8 @@ import com.example.tesorosdeltiempo.ui.BarraArribaAy
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
+// Pantalla principal de galería de recuerdos, filtro por etiquetas y acceso a crear uno nuevo
+
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: RecuerdosViewModel by viewModels {
@@ -28,7 +30,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        // Pongo la barra de arriba fija
+
+        // Barra superior de inicio, buscador de etiquetas y ajustes.
         BarraArribaAy.ponerBarraArriba(this) { query ->
             viewModel.filtrarPorEtiqueta(query)
         }
@@ -39,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         galeriaAdapter = GaleriaFotosAdap(this)
         gridView.adapter = galeriaAdapter
 
+        // Abrir detalle del recuerdo al pulsar una celda
         gridView.onItemClickListener =
             AdapterView.OnItemClickListener { _, _, position, _ ->
                 val recuerdo = galeriaAdapter.getItem(position) as RecuerdosEntity
@@ -56,10 +60,12 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
             }
 
+        // Formulario nuevo recuerdo
         fab.setOnClickListener {
             startActivity(Intent(this, NuevoRecuerdoActivity::class.java))
         }
 
+        // Actualizar galería cuando cambia la lista en Room
         lifecycleScope.launch {
             viewModel.recuerdos.collect { lista ->
                 galeriaAdapter.submitList(lista)
