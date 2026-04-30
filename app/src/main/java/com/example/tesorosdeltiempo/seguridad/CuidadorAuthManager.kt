@@ -36,10 +36,27 @@ class CuidadorAuthManager(contexto: Context) {
 
     fun obtenerUsuarioGuardado(): String? = preferenciasCifradas.getString(claveUsuario, null)
 
+    // Validaciones para registro y login
+    fun usuarioValido(nombreUsuario: String): Boolean {
+        if (nombreUsuario.isBlank()) return false
+        if (nombreUsuario.any { it.isWhitespace() }) return false
+        return nombreUsuario.contains("@")
+    }
+
+    fun contrasenaSegura(contrasena: String): Boolean {
+        if (contrasena.length < 8) return false
+        if (contrasena.any { it.isWhitespace() }) return false
+        val tieneMayuscula = contrasena.any { it.isUpperCase() }
+        val tieneNumero = contrasena.any { it.isDigit() }
+        val tieneSimbolo = contrasena.any { !it.isLetterOrDigit() }
+        return tieneMayuscula && tieneNumero && tieneSimbolo
+    }
+
     // Un solo cuidador registrado
     fun registrar(nombreUsuario: String, contrasena: String): Boolean {
         val usuarioLimpio = nombreUsuario.trim()
-        if (usuarioLimpio.isBlank() || contrasena.isBlank()) return false
+        if (!usuarioValido(usuarioLimpio)) return false
+        if (!contrasenaSegura(contrasena)) return false
 
         val usuarioYaGuardado = preferenciasCifradas.getString(claveUsuario, null)
         if (!usuarioYaGuardado.isNullOrBlank()) return false
@@ -56,7 +73,8 @@ class CuidadorAuthManager(contexto: Context) {
     // Comprueba usuario y contraseña con lo guardado
     fun iniciarSesion(nombreUsuario: String, contrasena: String): Boolean {
         val usuarioLimpio = nombreUsuario.trim()
-        if (usuarioLimpio.isBlank() || contrasena.isBlank()) return false
+        if (!usuarioValido(usuarioLimpio)) return false
+        if (contrasena.isBlank() || contrasena.any { it.isWhitespace() }) return false
 
         val usuarioGuardado = preferenciasCifradas.getString(claveUsuario, null) ?: return false
         val contrasenaGuardada = preferenciasCifradas.getString(claveContrasena, null) ?: return false
@@ -72,5 +90,14 @@ class CuidadorAuthManager(contexto: Context) {
     // Apaga el flag pero no borra usuario guardado (así puede volver a entrar)
     fun cerrarSesion() {
         preferenciasCifradas.edit().putBoolean(claveSesionIniciada, false).apply()
+    }
+
+    // Borra el cuidador almacenado y apaga sesión
+    fun eliminarUsuarioCuidador() {
+        preferenciasCifradas.edit()
+            .remove(claveUsuario)
+            .remove(claveContrasena)
+            .putBoolean(claveSesionIniciada, false)
+            .apply()
     }
 }

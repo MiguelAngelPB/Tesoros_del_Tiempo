@@ -13,6 +13,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.security.crypto.EncryptedFile
+import androidx.security.crypto.MasterKey
 import com.example.tesorosdeltiempo.BD.datos.RecuerdosEntity
 import com.example.tesorosdeltiempo.ui.RecuerdosViewModel
 import com.example.tesorosdeltiempo.ui.RecuerdosViewModelFactory
@@ -51,9 +53,11 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
             val path = pendingPhotoPath
             pendingPhotoPath = null
             if (success && !path.isNullOrEmpty()) {
-                selectedMainPath = path
-                selectedMainType = "FOTO"
-                actualizarResumen()
+                lifecycleScope.launch {
+                    selectedMainPath = cifrarArchivoLocal(path, "foto", ".jpg")
+                    selectedMainType = "FOTO"
+                    actualizarResumen()
+                }
             }
         }
 
@@ -245,14 +249,46 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
                 contentResolver.getType(uri)?.startsWith("audio") == true -> ".m4a"
                 else -> ""
             }
-            val nombre = "${prefijo}_${System.currentTimeMillis()}$extension"
+            val nombre = "${prefijo}_${System.currentTimeMillis()}$extension.enc"
             val destino = File(filesDir, nombre)
+            val claveMaestra = MasterKey.Builder(this@NuevoRecuerdoActivity)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            val archivoCifrado = EncryptedFile.Builder(
+                this@NuevoRecuerdoActivity,
+                destino,
+                claveMaestra,
+                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+            ).build()
             val input: InputStream? = contentResolver.openInputStream(uri)
             input.use { i ->
-                FileOutputStream(destino).use { o ->
+                archivoCifrado.openFileOutput().use { o ->
                     if (i != null) i.copyTo(o)
                 }
             }
+            destino.absolutePath
+        }
+
+    // Cifra un archivo local y devuelve la ruta .enc
+    private suspend fun cifrarArchivoLocal(rutaOriginal: String, prefijo: String, extension: String): String =
+        withContext(Dispatchers.IO) {
+            val origen = File(rutaOriginal)
+            val destino = File(filesDir, "${prefijo}_${System.currentTimeMillis()}$extension.enc")
+            val claveMaestra = MasterKey.Builder(this@NuevoRecuerdoActivity)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            val archivoCifrado = EncryptedFile.Builder(
+                this@NuevoRecuerdoActivity,
+                destino,
+                claveMaestra,
+                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+            ).build()
+            origen.inputStream().use { input ->
+                archivoCifrado.openFileOutput().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            try { origen.delete() } catch (_: Exception) { }
             destino.absolutePath
         }
 
