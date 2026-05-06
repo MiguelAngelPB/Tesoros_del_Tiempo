@@ -12,6 +12,7 @@ class CuidadorAuthManager(contexto: Context) {
     private val claveUsuario = "cuidador_username"
     private val claveContrasena = "cuidador_password"
     private val claveSesionIniciada = "cuidador_logged_in"
+    private val claveRecuerdoBonito = "cuidador_recuerdo_bonito"
 
     private val preferenciasCifradas: SharedPreferences by lazy {
         crearPreferenciasCifradas(contexto)
@@ -52,11 +53,25 @@ class CuidadorAuthManager(contexto: Context) {
         return tieneMayuscula && tieneNumero && tieneSimbolo
     }
 
+    // Frase de recuperación
+    fun recuerdoBonitoValido(texto: String): Boolean {
+        if (texto.isBlank()) return false
+        if (texto.contains('\n') || texto.contains('\r')) return false
+        return texto.length in 8..20
+    }
+
+    fun hayCuidadorRegistrado(): Boolean =
+        !preferenciasCifradas.getString(claveUsuario, null).isNullOrBlank()
+
+    fun tieneFraseRecuperacionGuardada(): Boolean =
+        !preferenciasCifradas.getString(claveRecuerdoBonito, null).isNullOrBlank()
+
     // Un solo cuidador registrado
-    fun registrar(nombreUsuario: String, contrasena: String): Boolean {
+    fun registrar(nombreUsuario: String, contrasena: String, recuerdoBonito: String): Boolean {
         val usuarioLimpio = nombreUsuario.trim()
         if (!usuarioValido(usuarioLimpio)) return false
         if (!contrasenaSegura(contrasena)) return false
+        if (!recuerdoBonitoValido(recuerdoBonito)) return false
 
         val usuarioYaGuardado = preferenciasCifradas.getString(claveUsuario, null)
         if (!usuarioYaGuardado.isNullOrBlank()) return false
@@ -64,9 +79,26 @@ class CuidadorAuthManager(contexto: Context) {
         preferenciasCifradas.edit()
             .putString(claveUsuario, usuarioLimpio)
             .putString(claveContrasena, contrasena)
+            .putString(claveRecuerdoBonito, recuerdoBonito)
             .putBoolean(claveSesionIniciada, true)
             .apply()
 
+        return true
+    }
+
+    fun verificarFraseRecuperacion(frase: String): Boolean {
+        val guardada = preferenciasCifradas.getString(claveRecuerdoBonito, null) ?: return false
+        return guardada == frase
+    }
+
+    // Si la frase coincide, se puede restablecer la contraseña
+    fun restablecerContrasenaConFrase(frase: String, nuevaContrasena: String): Boolean {
+        if (!verificarFraseRecuperacion(frase)) return false
+        if (!contrasenaSegura(nuevaContrasena)) return false
+        preferenciasCifradas.edit()
+            .putString(claveContrasena, nuevaContrasena)
+            .putBoolean(claveSesionIniciada, true)
+            .apply()
         return true
     }
 
@@ -97,6 +129,7 @@ class CuidadorAuthManager(contexto: Context) {
         preferenciasCifradas.edit()
             .remove(claveUsuario)
             .remove(claveContrasena)
+            .remove(claveRecuerdoBonito)
             .putBoolean(claveSesionIniciada, false)
             .apply()
     }
