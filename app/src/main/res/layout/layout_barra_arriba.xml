@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/barraArriba"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -18,8 +19,8 @@
         android:layout_height="48dp"
         android:background="@android:color/transparent"
         android:contentDescription="Inicio"
-        android:src="@android:drawable/ic_menu_view"
-        android:tint="@android:color/white" />
+        android:src="@drawable/home_245"
+        app:tint="@android:color/white" />
 
     <EditText
         android:id="@+id/etSearchTop"
@@ -43,7 +44,7 @@
         android:layout_height="48dp"
         android:background="@android:color/transparent"
         android:contentDescription="Ajustes"
-        android:src="@android:drawable/ic_menu_manage"
-        android:tint="@android:color/white" />
+        android:src="@drawable/settings_171"
+        app:tint="@color/white" />
 
 </LinearLayout>

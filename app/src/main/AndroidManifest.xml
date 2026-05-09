@@ -6,9 +6,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/tesoros_del_tiempo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/tesoros_del_tiempo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TesorosDelTiempo"
         android:hardwareAccelerated="true"
@@ -44,15 +44,18 @@
             android:theme="@style/Theme.TesorosDelTiempo"
             android:parentActivityName=".MainActivity"/>
         <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.TesorosDelTiempo">
+            android:name=".BienvenidaActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TesorosDelTiempo" />
     </application>
 
 </manifest>

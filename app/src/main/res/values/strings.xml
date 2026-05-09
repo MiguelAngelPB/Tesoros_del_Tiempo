@@ -7,4 +7,5 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="title_activity_imagen_completa">ImagenCompleta</string>
+    <string name="logo_fondo" />
 </resources>
