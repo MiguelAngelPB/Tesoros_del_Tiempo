@@ -86,6 +86,32 @@
         android:layout_marginTop="12dp" />
 
     <Button
+        android:id="@+id/btnExportarGaleria"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Exportar datos (otro móvil)"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/btnPapelera"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="12dp" />
+
+    <Button
+        android:id="@+id/btnImportarGaleria"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Importar datos"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/btnExportarGaleria"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="12dp" />
+
+    <Button
         android:id="@+id/btnEliminarUsuarioCuidador"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

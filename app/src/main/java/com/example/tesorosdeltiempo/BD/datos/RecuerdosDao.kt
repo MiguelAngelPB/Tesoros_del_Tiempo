@@ -5,6 +5,8 @@ import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 
 // Consultas y cambios en SQLite vía Room
 @Dao
@@ -56,4 +58,12 @@ interface RecuerdosDao {
 
     @Query("DELETE FROM recuerdos WHERE enPapelera = 1")
     suspend fun eliminarTodoEnPapeleraDefinitivo(): Int
+
+    // Lectura solo para copia de seguridad
+    @Query("SELECT * FROM recuerdos ORDER BY id ASC")
+    fun listarTodosRecuerdos(): List<RecuerdosEntity>
+
+    // Inserción solo para importar
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    fun insertar(recuerdo: RecuerdosEntity): Long
 }

@@ -15,6 +15,10 @@ import com.example.tesorosdeltiempo.seguridad.CuidadorAuthManager
 import com.example.tesorosdeltiempo.ui.BarraArribaAy
 import android.text.Editable
 import android.text.TextWatcher
+import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 // Ajustes login/registro cuidador, papelera (solo con sesión) y barra
 class AjustesActivity : AppCompatActivity() {
@@ -26,6 +30,56 @@ class AjustesActivity : AppCompatActivity() {
     private lateinit var btnLogoutCuidador: Button
     private lateinit var btnPapelera: Button
     private lateinit var btnEliminarUsuarioCuidador: Button
+    private lateinit var btnExportarGaleria: Button
+    private lateinit var btnImportarGaleria: Button
+
+    private val lanzadorExportarZip =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri: Uri? ->
+            if (uri != null) {
+                lifecycleScope.launch {
+                    GaleriaExportImport.exportarZipPortatil(this@AjustesActivity, uri).fold(
+                        onSuccess = {
+                            Toast.makeText(
+                                this@AjustesActivity,
+                                "Copia lista (sirve en otro móvil con esta app)",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        },
+                        onFailure = { e ->
+                            Toast.makeText(
+                                this@AjustesActivity,
+                                e.message ?: "Error al exportar",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    )
+                }
+            }
+        }
+
+    private val lanzadorImportarZip =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+            if (uri != null) {
+                lifecycleScope.launch {
+                    GaleriaExportImport.importarZipPortatil(this@AjustesActivity, uri).fold(
+                        onSuccess = { n ->
+                            Toast.makeText(
+                                this@AjustesActivity,
+                                "Importados $n recuerdos (añadidos a los actuales)",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        },
+                        onFailure = { e ->
+                            Toast.makeText(
+                                this@AjustesActivity,
+                                e.message ?: "Error al importar",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    )
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +95,8 @@ class AjustesActivity : AppCompatActivity() {
         btnLogoutCuidador = findViewById(R.id.btnLogoutCuidador)
         btnPapelera = findViewById(R.id.btnPapelera)
         btnEliminarUsuarioCuidador = findViewById(R.id.btnEliminarUsuarioCuidador)
+        btnExportarGaleria = findViewById(R.id.btnExportarGaleria)
+        btnImportarGaleria = findViewById(R.id.btnImportarGaleria)
 
         // Papelera solo con el cuidador conectado (se oculta si no)
         btnPapelera.setOnClickListener {
@@ -59,6 +115,25 @@ class AjustesActivity : AppCompatActivity() {
             auth.cerrarSesion()
             actualizarEstadoUI()
             Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show()
+        }
+
+        btnExportarGaleria.setOnClickListener {
+            lanzadorExportarZip.launch(GaleriaExportImport.nombreCopiaSugerido())
+        }
+
+        btnImportarGaleria.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Importar en este móvil")
+                .setMessage(
+                    "Elige un .zip creado con «Exportar datos». " +
+                            "Los recuerdos se añaden a los que ya hay. " +
+                            "El archivo contiene las fotos/vídeos sin el cifrado de la app: guárdalo en un sitio seguro."
+                )
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Elegir archivo") { _, _ ->
+                    lanzadorImportarZip.launch(arrayOf("application/zip", "application/x-zip-compressed"))
+                }
+                .show()
         }
 
         btnEliminarUsuarioCuidador.setOnClickListener {
@@ -103,6 +178,8 @@ class AjustesActivity : AppCompatActivity() {
         btnLogoutCuidador.visibility = if (loggedIn) View.VISIBLE else View.GONE
         btnEliminarUsuarioCuidador.visibility = if (loggedIn) View.VISIBLE else View.GONE
         btnPapelera.visibility = if (loggedIn) View.VISIBLE else View.GONE
+        btnExportarGaleria.visibility = if (loggedIn) View.VISIBLE else View.GONE
+        btnImportarGaleria.visibility = if (loggedIn) View.VISIBLE else View.GONE
     }
 
     private enum class ModoAuth { LOGIN, REGISTRO }
