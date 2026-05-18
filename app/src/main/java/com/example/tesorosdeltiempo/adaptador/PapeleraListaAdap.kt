@@ -38,7 +38,7 @@ class PapeleraListaAdap(
         val btnRestaurar = vista.findViewById<Button>(R.id.btnRestaurarItem)
         val btnEliminar = vista.findViewById<Button>(R.id.btnEliminarDefinitivoItem)
 
-        tvTitulo.text = recuerdo.title.ifBlank { "Sin título" }
+        tvTitulo.text = recuerdo.title.ifBlank { contexto.getString(R.string.sin_t_tulo) }
 
         val id = recuerdo.id
         btnRestaurar.setOnClickListener { alRestaurar(id) }

@@ -29,7 +29,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nuevo recuerdo"
+                android:text="@string/nuevo_recuerdo"
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
                 android:layout_marginTop="16dp"
-                android:hint="Título del recuerdo" />
+                android:hint="@string/t_tulo_del_recuerdo" />
 
             <EditText
                 android:id="@+id/etTagsRecuerdo"
@@ -47,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
                 android:layout_marginTop="8dp"
-                android:hint="Etiquetas (separadas por comas)" />
+                android:hint="@string/etiquetas_separadas_por_comas" />
 
             <EditText
                 android:id="@+id/etDescripcionTextoOpcional"
@@ -55,13 +55,13 @@
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
                 android:layout_marginTop="8dp"
-                android:hint="Descripción opcional en texto" />
+                android:hint="@string/descripci_n_opcional_en_texto" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Contenido principal del recuerdo"
+                android:text="@string/contenido_principal_del_recuerdo"
                 android:textStyle="bold" />
 
             <Button
@@ -69,41 +69,41 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Hacer foto" />
+                android:text="@string/hacer_foto" />
 
             <Button
                 android:id="@+id/btnVideoNuevo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Grabar vídeo" />
+                android:text="@string/grabar_v_deo" />
 
             <Button
                 android:id="@+id/btnAudioNuevo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Grabar audio" />
+                android:text="@string/grabar_audio" />
 
             <Button
                 android:id="@+id/btnArchivoNuevo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Seleccionar archivo" />
+                android:text="@string/seleccionar_archivo" />
 
             <Button
                 android:id="@+id/btnTextoSoloNuevo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Usar texto como contenido principal" />
+                android:text="@string/usar_texto_como_contenido_principal" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Descripción multimedia opcional"
+                android:text="@string/descripci_n_multimedia_opcional"
                 android:textStyle="bold" />
 
             <Button
@@ -111,21 +111,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Adjuntar descripción (foto/vídeo/audio)" />
+                android:text="@string/adjuntar_descripci_n_foto_v_deo_audio" />
 
             <TextView
                 android:id="@+id/tvResumenAdjuntos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Sin contenido adjunto todavía." />
+                android:text="@string/sin_contenido_adjunto_todav_a" />
 
             <Button
                 android:id="@+id/btnGuardarRecuerdo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Guardar recuerdo" />
+                android:text="@string/guardar_recuerdo" />
 
         </LinearLayout>
     </ScrollView>

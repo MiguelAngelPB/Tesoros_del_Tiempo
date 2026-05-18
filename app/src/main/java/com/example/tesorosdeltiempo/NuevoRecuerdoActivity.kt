@@ -185,14 +185,14 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
     // Texto de ayuda bajo el formulario con lo seleccionado hasta ahora
     private fun actualizarResumen() {
         val principal = if (!selectedMainType.isNullOrEmpty()) {
-            "Principal: $selectedMainType"
+            getString(R.string.principal, traducirTipoAVisual(selectedMainType!!))
         } else {
-            "Principal: sin seleccionar"
+            getString(R.string.principal_sin_seleccionar)
         }
         val descripcion = if (!selectedDescriptionType.isNullOrEmpty()) {
-            "Descripción multimedia: $selectedDescriptionType"
+            getString(R.string.descripci_n_multimedia, traducirTipoAVisual(selectedDescriptionType!!))
         } else {
-            "Descripción multimedia: no adjunta"
+            getString(R.string.descripci_n_multimedia_no_adjunta)
         }
         tvResumenAdjuntos.text = "$principal\n$descripcion"
     }
@@ -203,7 +203,7 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
         if (tipoPrincipal.isNullOrBlank()) {
             Toast.makeText(
                 this,
-                "Selecciona primero el contenido principal del recuerdo",
+                getString(R.string.selecciona_primero_el_contenido_principal_del_recuerdo),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -214,7 +214,7 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
             selectedMainPath.orEmpty()
         )
         viewModel.guardarRecuerdo(recuerdo)
-        Toast.makeText(this, "Recuerdo guardado correctamente", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.recuerdo_guardado_correctamente), Toast.LENGTH_SHORT).show()
         finish()
     }
 
@@ -294,6 +294,16 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
 
     private fun generarTituloAutomatico(tipo: String): String {
         val formato = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-        return "$tipo - ${formato.format(Date())}"
+        return getString(R.string.titulo_automatico_formato, traducirTipoAVisual(tipo), formato.format(Date()))
+    }
+
+    private fun traducirTipoAVisual(tipoInterno: String): String {
+        return when (tipoInterno) {
+            "FOTO" -> getString(R.string.foto)
+            "VIDEO" -> getString(R.string.video)
+            "AUDIO" -> getString(R.string.audio)
+            "TEXTO" -> getString(R.string.texto)
+            else -> tipoInterno
+        }
     }
 }

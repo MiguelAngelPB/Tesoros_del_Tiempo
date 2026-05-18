@@ -17,7 +17,7 @@ import com.example.tesorosdeltiempo.ui.RecuerdosViewModel
 import com.example.tesorosdeltiempo.ui.RecuerdosViewModelFactory
 import kotlinx.coroutines.launch
 
-// Lista de recuerdos en la papelera y restaurar o borrar (uno o todo) con confirmación
+// Lista de recuerdos en la papelera y restaurar o borrar (uno o todos) con confirmación
 class PapeleraActivity : AppCompatActivity() {
 
     private val viewModel: RecuerdosViewModel by viewModels {
@@ -35,7 +35,8 @@ class PapeleraActivity : AppCompatActivity() {
         // Pantalla solo para cuidador con sesión iniciada
         val auth = CuidadorAuthManager(this)
         if (!auth.estaConectado()) {
-            Toast.makeText(this, "Inicia sesión como cuidador para ver la papelera", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this,
+                getString(R.string.inicia_sesi_n_como_cuidador_para_ver_la_papelera), Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -50,16 +51,16 @@ class PapeleraActivity : AppCompatActivity() {
             items = emptyList(),
             alRestaurar = { id ->
                 viewModel.restaurarDesdePapeleraPorId(id)
-                Toast.makeText(this, "Restaurado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.restaurado), Toast.LENGTH_SHORT).show()
             },
             alEliminarDefinitivo = { id ->
                 AlertDialog.Builder(this)
-                    .setTitle("Eliminar para siempre")
-                    .setMessage("¿Seguro? No se puede deshacer.")
-                    .setNegativeButton("Cancelar", null)
-                    .setPositiveButton("Eliminar") { _, _ ->
+                    .setTitle(getString(R.string.eliminar_para_siempre))
+                    .setMessage(getString(R.string.seguro_no_se_puede_deshacer))
+                    .setNegativeButton(getString(R.string.cancelar), null)
+                    .setPositiveButton(getString(R.string.eliminar)) { _, _ ->
                         viewModel.eliminarDefinitivoDesdePapeleraPorId(id)
-                        Toast.makeText(this, "Eliminado", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.eliminado), Toast.LENGTH_SHORT).show()
                     }
                     .show()
             }
@@ -69,12 +70,12 @@ class PapeleraActivity : AppCompatActivity() {
         // Vuelven todos los recuerdos a la galería principal
         findViewById<Button>(R.id.btnRestaurarTodoPapelera).setOnClickListener {
             AlertDialog.Builder(this)
-                .setTitle("Restaurar todo")
-                .setMessage("¿Volver a poner todos los recuerdos en la galería principal?")
-                .setNegativeButton("Cancelar", null)
-                .setPositiveButton("Restaurar todo") { _, _ ->
+                .setTitle(getString(R.string.restaurar_todo))
+                .setMessage(getString(R.string.volver_a_poner_todos_los_recuerdos_en_la_galer_a_principal))
+                .setNegativeButton(getString(R.string.cancelar), null)
+                .setPositiveButton(getString(R.string.restaurar_todo)) { _, _ ->
                     viewModel.restaurarTodoDesdePapelera()
-                    Toast.makeText(this, "Todo restaurado", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.todo_restaurado), Toast.LENGTH_SHORT).show()
                 }
                 .show()
         }
@@ -82,12 +83,12 @@ class PapeleraActivity : AppCompatActivity() {
         // Borra todos los recuerdos de la papelera
         findViewById<Button>(R.id.btnEliminarTodoPapelera).setOnClickListener {
             AlertDialog.Builder(this)
-                .setTitle("Vaciar papelera")
-                .setMessage("Se borrarán definitivamente todos los recuerdos de la papelera y sus archivos.")
-                .setNegativeButton("Cancelar", null)
-                .setPositiveButton("Eliminar todo") { _, _ ->
+                .setTitle(getString(R.string.vaciar_papelera))
+                .setMessage(getString(R.string.se_borrar_n_definitivamente_todos_los_recuerdos_de_la_papelera_y_sus_archivos))
+                .setNegativeButton(getString(R.string.cancelar), null)
+                .setPositiveButton(getString(R.string.eliminar_todo)) { _, _ ->
                     viewModel.vaciarPapeleraDefinitivo()
-                    Toast.makeText(this, "Papelera vaciada", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.papelera_vaciada), Toast.LENGTH_SHORT).show()
                 }
                 .show()
         }

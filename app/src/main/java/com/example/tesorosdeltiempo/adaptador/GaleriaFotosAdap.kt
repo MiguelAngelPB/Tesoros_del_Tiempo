@@ -8,6 +8,7 @@ import android.widget.AbsListView
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import com.example.tesorosdeltiempo.BD.datos.RecuerdosEntity
+import com.example.tesorosdeltiempo.R
 import com.example.tesorosdeltiempo.seguridad.AyArchivoSeguro
 import java.io.File
 
@@ -32,7 +33,7 @@ class GaleriaFotosAdap(private val mContext: Context) : BaseAdapter() {
         val recuerdo = recuerdos[position]
 
         when (recuerdo.type) {
-            "FOTO" -> {
+            mContext.getString(R.string.foto) -> {
                 val bitmap = if (AyArchivoSeguro.esRutaArchivoCifrado(recuerdo.filePath)) {
                     var tempFile: File? = null
                     try {
@@ -55,13 +56,13 @@ class GaleriaFotosAdap(private val mContext: Context) : BaseAdapter() {
                     imageView.setImageResource(android.R.drawable.ic_menu_report_image)
                 }
             }
-            "VIDEO" -> {
+            mContext.getString(R.string.video) -> {
                 imageView.setImageResource(android.R.drawable.ic_media_play)
             }
-            "AUDIO" -> {
+            mContext.getString(R.string.audio) -> {
                 imageView.setImageResource(android.R.drawable.ic_btn_speak_now)
             }
-            "TEXTO" -> {
+            mContext.getString(R.string.texto) -> {
                 imageView.setImageResource(android.R.drawable.ic_menu_edit)
             }
             else -> {

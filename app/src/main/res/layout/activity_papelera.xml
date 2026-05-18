@@ -16,7 +16,7 @@
         android:id="@+id/tvTituloPapeleraPantalla"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Papelera"
+        android:text="@string/papelera_btn"
         android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/topBar"
@@ -29,7 +29,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="No hay recuerdos en la papelera"
+        android:text="@string/no_hay_recuerdos_en_la_papelera"
         android:textSize="15sp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/tvTituloPapeleraPantalla"
@@ -65,13 +65,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Restaurar todo" />
+            android:text="@string/restaurar_todo" />
 
         <Button
             android:id="@+id/btnEliminarTodoPapelera"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Eliminar todo" />
+            android:text="@string/eliminar_todo" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

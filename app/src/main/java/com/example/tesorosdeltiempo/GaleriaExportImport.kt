@@ -36,11 +36,11 @@ object GaleriaExportImport {
                 val items = JSONArray()
                 BufferedOutputStream(
                     context.contentResolver.openOutputStream(destinoUri)
-                        ?: error("No se pudo crear el archivo")
+                        ?: error(context.getString(R.string.no_se_pudo_crear_el_archivo))
                 ).use { out ->
                     ZipOutputStream(out).use { zos ->
                         for (r in lista) {
-                            val main = zipNombreYBytes(context, r.filePath, "${PREFIX}${r.id}_principal.bin")
+                            val main = zipNombreYBytes(context, r.filePath, "${PREFIX}${r.id}_main.bin")
                             if (main != null) {
                                 zos.putNextEntry(ZipEntry(main.first))
                                 zos.write(main.second)
@@ -79,15 +79,18 @@ object GaleriaExportImport {
             try {
                 context.contentResolver.openInputStream(origenUri)?.use { input ->
                     FileOutputStream(temp).use { input.copyTo(it) }
-                } ?: error("No se pudo leer el archivo")
+                } ?: error(context.getString(R.string.no_se_pudo_leer_el_archivo))
 
                 val db = AppDatabase.getInstance(context)
                 val dao = db.recuerdosDao()
                 val n = ZipFile(temp).use { zip ->
-                    val texto = zip.getInputStream(zip.getEntry(MANIFEST) ?: error("Copia inválida"))
+                    val texto = zip.getInputStream(zip.getEntry(MANIFEST) ?: error(
+                        context.getString(
+                            R.string.copia_inv_lida
+                        )))
                         .bufferedReader().use { it.readText() }
                     val raiz = JSONObject(texto)
-                    if (raiz.getInt("v") != VERSION) error("Copia no compatible")
+                    if (raiz.getInt("v") != VERSION) error(context.getString(R.string.copia_no_compatible))
                     val arr = raiz.getJSONArray("items")
                     val filas = ArrayList<RecuerdosEntity>(arr.length())
                     for (i in 0 until arr.length()) {

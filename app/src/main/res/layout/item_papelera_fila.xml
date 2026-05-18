@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:text="Título" />
+        android:text="@string/t_tulo" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,13 +24,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Restaurar" />
+            android:text="@string/restaurar" />
 
         <Button
             android:id="@+id/btnEliminarDefinitivoItem"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Eliminar" />
+            android:text="@string/eliminar" />
     </LinearLayout>
 </LinearLayout>

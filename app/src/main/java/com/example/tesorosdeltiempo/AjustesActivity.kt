@@ -32,6 +32,7 @@ class AjustesActivity : AppCompatActivity() {
     private lateinit var btnEliminarUsuarioCuidador: Button
     private lateinit var btnExportarGaleria: Button
     private lateinit var btnImportarGaleria: Button
+    private lateinit var btnCambiarIdioma: Button
 
     private val lanzadorExportarZip =
         registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri: Uri? ->
@@ -41,14 +42,14 @@ class AjustesActivity : AppCompatActivity() {
                         onSuccess = {
                             Toast.makeText(
                                 this@AjustesActivity,
-                                "Copia lista (sirve en otro móvil con esta app)",
+                                getString(R.string.copia_lista_sirve_en_otro_m_vil_con_esta_app),
                                 Toast.LENGTH_SHORT
                             ).show()
                         },
                         onFailure = { e ->
                             Toast.makeText(
                                 this@AjustesActivity,
-                                e.message ?: "Error al exportar",
+                                e.message ?: getString(R.string.error_al_exportar),
                                 Toast.LENGTH_LONG
                             ).show()
                         }
@@ -65,14 +66,14 @@ class AjustesActivity : AppCompatActivity() {
                         onSuccess = { n ->
                             Toast.makeText(
                                 this@AjustesActivity,
-                                "Importados $n recuerdos (añadidos a los actuales)",
+                                getString(R.string.importados_recuerdos_a_adidos_a_los_actuales, n),
                                 Toast.LENGTH_LONG
                             ).show()
                         },
                         onFailure = { e ->
                             Toast.makeText(
                                 this@AjustesActivity,
-                                e.message ?: "Error al importar",
+                                e.message ?: getString(R.string.error_al_importar),
                                 Toast.LENGTH_LONG
                             ).show()
                         }
@@ -97,6 +98,7 @@ class AjustesActivity : AppCompatActivity() {
         btnEliminarUsuarioCuidador = findViewById(R.id.btnEliminarUsuarioCuidador)
         btnExportarGaleria = findViewById(R.id.btnExportarGaleria)
         btnImportarGaleria = findViewById(R.id.btnImportarGaleria)
+        btnCambiarIdioma = findViewById(R.id.btnCambiarIdioma)
 
         // Papelera solo con el cuidador conectado (se oculta si no)
         btnPapelera.setOnClickListener {
@@ -114,7 +116,7 @@ class AjustesActivity : AppCompatActivity() {
         btnLogoutCuidador.setOnClickListener {
             auth.cerrarSesion()
             actualizarEstadoUI()
-            Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.sesi_n_cerrada), Toast.LENGTH_SHORT).show()
         }
 
         btnExportarGaleria.setOnClickListener {
@@ -123,28 +125,29 @@ class AjustesActivity : AppCompatActivity() {
 
         btnImportarGaleria.setOnClickListener {
             AlertDialog.Builder(this)
-                .setTitle("Importar en este móvil")
-                .setMessage(
-                    "Elige un .zip creado con «Exportar datos». " +
-                            "Los recuerdos se añaden a los que ya hay. " +
-                            "El archivo contiene las fotos/vídeos sin el cifrado de la app: guárdalo en un sitio seguro."
-                )
-                .setNegativeButton("Cancelar", null)
-                .setPositiveButton("Elegir archivo") { _, _ ->
+                .setTitle(getString(R.string.importar_en_este_m_vil))
+                .setMessage(getString(R.string.mensaje_importar_galeria))
+                .setNegativeButton(getString(R.string.cancelar), null)
+                .setPositiveButton(getString(R.string.elegir_archivo)) { _, _ ->
                     lanzadorImportarZip.launch(arrayOf("application/zip", "application/x-zip-compressed"))
                 }
                 .show()
         }
 
+        btnCambiarIdioma.setOnClickListener {
+            mostrarDialogoIdioma()
+        }
+
         btnEliminarUsuarioCuidador.setOnClickListener {
             AlertDialog.Builder(this)
-                .setTitle("Eliminar usuario cuidador")
-                .setMessage("Se borrarán las credenciales guardadas de este dispositivo. ¿Continuar?")
-                .setNegativeButton("Cancelar", null)
-                .setPositiveButton("Eliminar") { _, _ ->
+                .setTitle(getString(R.string.eliminar_usuario_cuidador))
+                .setMessage(getString(R.string.se_borrar_n_las_credenciales_guardadas_de_este_dispositivo_continuar))
+                .setNegativeButton(getString(R.string.cancelar), null)
+                .setPositiveButton(getString(R.string.eliminar)) { _, _ ->
                     auth.eliminarUsuarioCuidador()
                     actualizarEstadoUI()
-                    Toast.makeText(this, "Usuario cuidador eliminado", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this,
+                        getString(R.string.usuario_cuidador_eliminado), Toast.LENGTH_SHORT).show()
                 }
                 .show()
         }
@@ -164,9 +167,9 @@ class AjustesActivity : AppCompatActivity() {
 
         tvEstadoCuidador.text = if (loggedIn) {
             val user = auth.obtenerUsuarioGuardado().orEmpty()
-            "Cuidador conectado: $user"
+            getString(R.string.cuidador_conectado, user)
         } else {
-            "No has iniciado sesión como cuidador"
+            getString(R.string.no_has_iniciado_sesi_n_como_cuidador)
         }
 
         val showLoginRegistro = !loggedIn
@@ -180,6 +183,32 @@ class AjustesActivity : AppCompatActivity() {
         btnPapelera.visibility = if (loggedIn) View.VISIBLE else View.GONE
         btnExportarGaleria.visibility = if (loggedIn) View.VISIBLE else View.GONE
         btnImportarGaleria.visibility = if (loggedIn) View.VISIBLE else View.GONE
+        btnCambiarIdioma.visibility = if (loggedIn) View.VISIBLE else View.GONE
+    }
+
+    private fun mostrarDialogoIdioma() {
+        // Textos que verá el usuario en el diálogo
+        val idiomas = arrayOf("Español", "English")
+        // Códigos de los idiomas
+        val codigos = arrayOf("es", "en")
+
+        // Averiguar qué idioma está puesto ahora mismo para dejarlo marcado
+        val idiomaActual = androidx.appcompat.app.AppCompatDelegate.getApplicationLocales().toLanguageTags()
+        val indiceSeleccionado = if (idiomaActual.contains("en")) 1 else 0
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.selecciona_idioma))
+            .setSingleChoiceItems(idiomas, indiceSeleccionado) { dialog, which ->
+                val codigoSeleccionado = codigos[which]
+
+                // Se aplica el idioma y se reinicia la pantalla
+                val locales = androidx.core.os.LocaleListCompat.forLanguageTags(codigoSeleccionado)
+                androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(locales)
+
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(R.string.cancelar), null)
+            .show()
     }
 
     private enum class ModoAuth { LOGIN, REGISTRO }
@@ -191,20 +220,20 @@ class AjustesActivity : AppCompatActivity() {
             setPadding(32, 24, 32, 0)
         }
         val etUsername = EditText(this).apply {
-            hint = "Usuario (cuidador)"
+            hint = context.getString(R.string.usuario_cuidador)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
             isSingleLine = true
             maxLines = 1
         }
         val etPassword = EditText(this).apply {
-            hint = "Contraseña"
+            hint = context.getString(R.string.contrase_a)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
             isSingleLine = true
             maxLines = 1
         }
 
         val etRecuerdoBonito = EditText(this).apply {
-            hint = "Recuerdo más bonito con el paciente (8–20 caracteres)"
+            hint = context.getString(R.string.recuerdo_m_s_bonito_con_el_paciente_8_20_caracteres)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
             isSingleLine = true
             maxLines = 1
@@ -212,14 +241,14 @@ class AjustesActivity : AppCompatActivity() {
 
         val avisoRecuerdo = TextView(this).apply {
             text =
-                "Copia y pega o escribe esta frase en un lugar seguro, es muy importante."
+                context.getString(R.string.copia_y_pega_o_escribe_esta_frase_en_un_lugar_seguro_es_muy_importante)
             setPadding(0, 8, 0, 0)
             textSize = 13f
             setTextColor(0xFF555555.toInt())
         }
 
         val tvOlvide = TextView(this).apply {
-            text = "Olvidé mi contraseña"
+            text = context.getString(R.string.olvid_mi_contrase_a)
             setPadding(0, 16, 0, 0)
             textSize = 15f
             setTextColor(0xFF1565C0.toInt())
@@ -242,15 +271,17 @@ class AjustesActivity : AppCompatActivity() {
         }
 
         val titulo = when (modo) {
-            ModoAuth.LOGIN -> "Iniciar sesión"
-            ModoAuth.REGISTRO -> "Registrarse"
+            ModoAuth.LOGIN -> getString(R.string.iniciar_sesi_n)
+            ModoAuth.REGISTRO -> getString(R.string.registrarse)
         }
 
         val dialogo = AlertDialog.Builder(this)
             .setTitle(titulo)
             .setView(contenedor)
-            .setPositiveButton(if (modo == ModoAuth.LOGIN) "Entrar" else "Guardar", null)
-            .setNegativeButton("Cancelar", null)
+            .setPositiveButton(if (modo == ModoAuth.LOGIN) getString(R.string.entrar) else getString(
+                R.string.guardar
+            ), null)
+            .setNegativeButton(getString(R.string.cancelar), null)
             .create()
 
         dialogo.setOnShowListener {
@@ -261,7 +292,7 @@ class AjustesActivity : AppCompatActivity() {
                 if (user.any { it.isWhitespace() } || pass.any { it.isWhitespace() }) {
                     Toast.makeText(
                         this,
-                        "Usuario y contraseña no pueden tener espacios.",
+                        getString(R.string.usuario_y_contrase_a_no_pueden_tener_espacios),
                         Toast.LENGTH_SHORT
                     ).show()
                     return@setOnClickListener
@@ -270,7 +301,7 @@ class AjustesActivity : AppCompatActivity() {
                 if (!auth.usuarioValido(user)) {
                     Toast.makeText(
                         this,
-                        "El usuario debe incluir @ y no tener espacios.",
+                        getString(R.string.el_usuario_debe_incluir_y_no_tener_espacios),
                         Toast.LENGTH_SHORT
                     ).show()
                     return@setOnClickListener
@@ -279,7 +310,7 @@ class AjustesActivity : AppCompatActivity() {
                 if (modo == ModoAuth.REGISTRO && !auth.contrasenaSegura(pass)) {
                     Toast.makeText(
                         this,
-                        "Contraseña: mínimo 8 caracteres, 1 mayúscula, 1 número y 1 símbolo.",
+                        getString(R.string.contrase_a_m_nimo_8_caracteres_1_may_scula_1_n_mero_y_1_s_mbolo),
                         Toast.LENGTH_LONG
                     ).show()
                     return@setOnClickListener
@@ -289,7 +320,7 @@ class AjustesActivity : AppCompatActivity() {
                     if (!auth.recuerdoBonitoValido(recuerdo)) {
                         Toast.makeText(
                             this,
-                            "El recuerdo debe tener entre 8 y 20 caracteres.",
+                            getString(R.string.el_recuerdo_debe_tener_entre_8_y_20_caracteres),
                             Toast.LENGTH_LONG
                         ).show()
                         return@setOnClickListener
@@ -303,14 +334,14 @@ class AjustesActivity : AppCompatActivity() {
                 }
 
                 if (ok) {
-                    Toast.makeText(this, "¡Listo!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.listo), Toast.LENGTH_SHORT).show()
                     actualizarEstadoUI()
                     dialogo.dismiss()
                 } else {
                     val msg = if (modo == ModoAuth.LOGIN) {
-                        "Usuario o contraseña incorrectos (sin espacios y usuario con @)."
+                        getString(R.string.usuario_o_contrase_a_incorrectos_sin_espacios_y_usuario_con)
                     } else {
-                        "Ya existe un cuidador registrado o no cumples las reglas de seguridad."
+                        getString(R.string.ya_existe_un_cuidador_registrado_o_no_cumples_las_reglas_de_seguridad)
                     }
                     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 }
@@ -327,20 +358,21 @@ class AjustesActivity : AppCompatActivity() {
 
     private fun mostrarDialogoRecuperacionFrase(dialogoLogin: AlertDialog) {
         if (!auth.hayCuidadorRegistrado()) {
-            Toast.makeText(this, "No hay ningún cuidador registrado en este dispositivo.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this,
+                getString(R.string.no_hay_ning_n_cuidador_registrado_en_este_dispositivo), Toast.LENGTH_SHORT).show()
             return
         }
         if (!auth.tieneFraseRecuperacionGuardada()) {
             Toast.makeText(
                 this,
-                "Esta cuenta no tiene frase de recuperación. Inicia sesión con tu contraseña o elimina el usuario y vuelve a registrarte.",
+                getString(R.string.esta_cuenta_no_tiene_frase_de_recuperaci_n_inicia_sesi_n_con_tu_contrase_a_o_elimina_el_usuario_y_vuelve_a_registrarte),
                 Toast.LENGTH_LONG
             ).show()
             return
         }
 
         val etFrase = EditText(this).apply {
-            hint = "Tu recuerdo más bonito con el paciente"
+            hint = context.getString(R.string.tu_recuerdo_m_s_bonito_con_el_paciente)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
             isSingleLine = true
             maxLines = 1
@@ -354,10 +386,10 @@ class AjustesActivity : AppCompatActivity() {
         }
 
         val dlg = AlertDialog.Builder(this)
-            .setTitle("Recuperar contraseña")
+            .setTitle(getString(R.string.recuperar_contrase_a))
             .setView(contenedor)
-            .setPositiveButton("Siguiente", null)
-            .setNegativeButton("Cancelar", null)
+            .setPositiveButton(getString(R.string.siguiente), null)
+            .setNegativeButton(getString(R.string.cancelar), null)
             .create()
 
         dlg.setOnShowListener {
@@ -366,13 +398,14 @@ class AjustesActivity : AppCompatActivity() {
                 if (!auth.recuerdoBonitoValido(frase)) {
                     Toast.makeText(
                         this,
-                        "El recuerdo debe tener entre 8 y 20 caracteres",
+                        getString(R.string.el_recuerdo_debe_tener_entre_8_y_20_caracteres),
                         Toast.LENGTH_LONG
                     ).show()
                     return@setOnClickListener
                 }
                 if (!auth.verificarFraseRecuperacion(frase)) {
-                    Toast.makeText(this, "La frase no coincide con la guardada al registrarte.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this,
+                        getString(R.string.la_frase_no_coincide_con_la_guardada_al_registrarte), Toast.LENGTH_LONG).show()
                     return@setOnClickListener
                 }
                 dlg.dismiss()
@@ -410,13 +443,13 @@ class AjustesActivity : AppCompatActivity() {
             setPadding(32, 24, 32, 0)
         }
         val etNueva = EditText(this).apply {
-            hint = "Nueva contraseña"
+            hint = context.getString(R.string.nueva_contrase_a)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
             isSingleLine = true
             maxLines = 1
         }
         val etRepite = EditText(this).apply {
-            hint = "Repite la nueva contraseña"
+            hint = context.getString(R.string.repite_la_nueva_contrase_a)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
             isSingleLine = true
             maxLines = 1
@@ -428,10 +461,10 @@ class AjustesActivity : AppCompatActivity() {
         contenedor.addView(etRepite)
 
         val dlg = AlertDialog.Builder(this)
-            .setTitle("Nueva contraseña")
+            .setTitle(getString(R.string.nueva_contrase_a))
             .setView(contenedor)
-            .setPositiveButton("Guardar", null)
-            .setNegativeButton("Cancelar", null)
+            .setPositiveButton(getString(R.string.guardar), null)
+            .setNegativeButton(getString(R.string.cancelar), null)
             .create()
 
         dlg.setOnShowListener {
@@ -439,24 +472,27 @@ class AjustesActivity : AppCompatActivity() {
                 val n = etNueva.text?.toString().orEmpty()
                 val r = etRepite.text?.toString().orEmpty()
                 if (n != r) {
-                    Toast.makeText(this, "Las contraseñas no coinciden.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this,
+                        getString(R.string.las_contrase_as_no_coinciden), Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
                 if (!auth.contrasenaSegura(n)) {
                     Toast.makeText(
                         this,
-                        "Contraseña: mínimo 8 caracteres, 1 mayúscula, 1 número y 1 símbolo.",
+                        getString(R.string.contrase_a_m_nimo_8_caracteres_1_may_scula_1_n_mero_y_1_s_mbolo),
                         Toast.LENGTH_LONG
                     ).show()
                     return@setOnClickListener
                 }
                 if (auth.restablecerContrasenaConFrase(fraseVerificada, n)) {
-                    Toast.makeText(this, "Contraseña actualizada. Has iniciado sesión.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this,
+                        getString(R.string.contrase_a_actualizada_has_iniciado_sesi_n), Toast.LENGTH_SHORT).show()
                     dialogoLogin.dismiss()
                     dlg.dismiss()
                     actualizarEstadoUI()
                 } else {
-                    Toast.makeText(this, "No se pudo guardar la contraseña.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this,
+                        getString(R.string.no_se_pudo_guardar_la_contrase_a), Toast.LENGTH_SHORT).show()
                 }
             }
         }

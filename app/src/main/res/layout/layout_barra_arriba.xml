@@ -18,7 +18,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="@android:color/transparent"
-        android:contentDescription="Inicio"
+        android:contentDescription="@string/inicio_desc"
         android:src="@drawable/home_245"
         app:tint="@android:color/white" />
 
@@ -30,7 +30,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:background="@android:color/white"
-        android:hint="Buscar por etiqueta"
+        android:hint="@string/buscar_por_etiqueta"
         android:imeOptions="actionSearch"
         android:inputType="text"
         android:paddingStart="12dp"
@@ -43,7 +43,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="@android:color/transparent"
-        android:contentDescription="Ajustes"
+        android:contentDescription="@string/ajustes_titulo"
         android:src="@drawable/settings_171"
         app:tint="@color/white" />
 

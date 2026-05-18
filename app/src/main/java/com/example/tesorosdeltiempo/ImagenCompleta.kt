@@ -54,7 +54,7 @@ class ImagenCompleta : AppCompatActivity() {
         btnBorrarRecuerdo = findViewById(R.id.btnBorrarRecuerdo)
         btnVerDatosRecuerdo = findViewById(R.id.btnVerDatosRecuerdo)
 
-        supportActionBar?.title = "Foto Completa"
+        supportActionBar?.title = getString(R.string.foto_completa)
 
         // Datos del recuerdo
         val recuerdoId = intent.getLongExtra("id", -1L)
@@ -90,12 +90,13 @@ class ImagenCompleta : AppCompatActivity() {
                         } else {
                             Toast.makeText(
                                 this,
-                                "No se pudo cargar la imagen",
+                                getString(R.string.no_se_pudo_cargar_la_imagen),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
                     } catch (_: Exception) {
-                        Toast.makeText(this, "No se pudo descifrar la imagen", Toast.LENGTH_SHORT)
+                        Toast.makeText(this,
+                            getString(R.string.no_se_pudo_descifrar_la_imagen), Toast.LENGTH_SHORT)
                             .show()
                     } finally {
                         try { tempFile?.delete() } catch (_: Exception) { }
@@ -131,13 +132,13 @@ class ImagenCompleta : AppCompatActivity() {
                     videoView.setOnErrorListener { _, what, extra ->
                         Toast.makeText(
                             this,
-                            "Error al reproducir el vídeo (what=$what, extra=$extra)",
+                            getString(R.string.error_al_reproducir_el_v_deo_what_extra, what, extra),
                             Toast.LENGTH_SHORT
                         ).show()
                         true
                     }
                 } else {
-                    Toast.makeText(this, "Vídeo no disponible", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.v_deo_no_disponible), Toast.LENGTH_SHORT).show()
                 }
             }
             "AUDIO" -> {
@@ -148,7 +149,8 @@ class ImagenCompleta : AppCompatActivity() {
                 audioButton.visibility = View.VISIBLE
                 audioButton.setOnClickListener {
                     if (filePath.isNullOrEmpty()) {
-                        Toast.makeText(this, "Audio no disponible", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this,
+                            getString(R.string.audio_no_disponible), Toast.LENGTH_SHORT).show()
                         return@setOnClickListener
                     }
                     val rutaAudio = if (AyArchivoSeguro.esRutaArchivoCifrado(filePath)) {
@@ -169,7 +171,7 @@ class ImagenCompleta : AppCompatActivity() {
                 textView.visibility = View.VISIBLE
                 val text = intent.getStringExtra("textContent")
                 textView.text = if (text.isNullOrBlank()) {
-                    "Recuerdo de texto sin contenido."
+                    getString(R.string.recuerdo_de_texto_sin_contenido)
                 } else {
                     text
                 }
@@ -179,7 +181,7 @@ class ImagenCompleta : AppCompatActivity() {
         // Diálogo "Te acuerdas…"
         btnVerDatosRecuerdo.setOnClickListener {
             val textoParaPersona = buildString {
-                append(title.trim().ifBlank { "Sin título" })
+                append(title.trim().ifBlank { getString(R.string.sin_t_tulo) })
                 if (tags.isNotBlank()) {
                     append("\n\n")
                     append(tags.trim())
@@ -258,7 +260,7 @@ class ImagenCompleta : AppCompatActivity() {
                         ivPreview.visibility = View.VISIBLE
                         ivPreview.setImageResource(android.R.drawable.ic_btn_speak_now)
                         btnPlayPausa.visibility = View.VISIBLE
-                        btnPlayPausa.text = "Escuchar"
+                        btnPlayPausa.text = getString(R.string.escuchar)
 
                         btnPlayPausa.setOnClickListener {
                             val mp = reproductorAudioDesc
@@ -266,11 +268,11 @@ class ImagenCompleta : AppCompatActivity() {
                                 val nuevo = MediaPlayer()
                                 nuevo.setDataSource(descriptionPathReal)
                                 nuevo.setOnPreparedListener {
-                                    btnPlayPausa.text = "Pausar"
+                                    btnPlayPausa.text = getString(R.string.pausar)
                                     it.start()
                                 }
                                 nuevo.setOnCompletionListener {
-                                    btnPlayPausa.text = "Escuchar"
+                                    btnPlayPausa.text = getString(R.string.escuchar)
                                     pararAudioDesc()
                                 }
                                 nuevo.prepareAsync()
@@ -278,10 +280,10 @@ class ImagenCompleta : AppCompatActivity() {
                             } else {
                                 if (mp.isPlaying) {
                                     mp.pause()
-                                    btnPlayPausa.text = "Escuchar"
+                                    btnPlayPausa.text = getString(R.string.escuchar)
                                 } else {
                                     mp.start()
-                                    btnPlayPausa.text = "Pausar"
+                                    btnPlayPausa.text = getString(R.string.pausar)
                                 }
                             }
                         }
@@ -300,14 +302,14 @@ class ImagenCompleta : AppCompatActivity() {
                         }
 
                         btnPlayPausa.visibility = View.VISIBLE
-                        btnPlayPausa.text = "Pausar"
+                        btnPlayPausa.text = getString(R.string.pausar)
                         btnPlayPausa.setOnClickListener {
                             if (vvPreview.isPlaying) {
                                 vvPreview.pause()
-                                btnPlayPausa.text = "Ver vídeo"
+                                btnPlayPausa.text = getString(R.string.ver_v_deo)
                             } else {
                                 vvPreview.start()
-                                btnPlayPausa.text = "Pausar"
+                                btnPlayPausa.text = getString(R.string.pausar)
                             }
                         }
                     }
@@ -315,9 +317,9 @@ class ImagenCompleta : AppCompatActivity() {
             }
 
             val dialogo = AlertDialog.Builder(this)
-                .setTitle("Te acuerdas…")
+                .setTitle(getString(R.string.te_acuerdas))
                 .setView(vista)
-                .setPositiveButton("Cerrar", null)
+                .setPositiveButton(getString(R.string.cerrar), null)
                 .create()
 
             dialogo.setOnDismissListener {
@@ -333,16 +335,18 @@ class ImagenCompleta : AppCompatActivity() {
         // Marca enPapelera para que el cuidador gestione en Ajustes
         btnBorrarRecuerdo.setOnClickListener {
             if (recuerdoId <= 0L) {
-                Toast.makeText(this, "No se pudo borrar este recuerdo", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,
+                    getString(R.string.no_se_pudo_borrar_este_recuerdo), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             AlertDialog.Builder(this)
-                .setTitle("Enviar a la papelera")
-                .setMessage("El recuerdo pasará a la papelera. El cuidador podrá restaurarlo o borrarlo definitivamente desde Ajustes.")
-                .setNegativeButton("Cancelar", null)
-                .setPositiveButton("A la papelera") { _, _ ->
+                .setTitle(getString(R.string.enviar_a_la_papelera))
+                .setMessage(getString(R.string.el_recuerdo_pasar_a_la_papelera_el_cuidador_podr_restaurarlo_o_borrarlo_definitivamente_desde_ajustes))
+                .setNegativeButton(R.string.cancelar, null)
+                .setPositiveButton(getString(R.string.a_la_papelera)) { _, _ ->
                     viewModel.moverRecuerdoAPapeleraPorId(recuerdoId)
-                    Toast.makeText(this, "Recuerdo en la papelera", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this,
+                        getString(R.string.recuerdo_en_la_papelera), Toast.LENGTH_SHORT).show()
                     finish()
                 }
                 .show()
@@ -363,11 +367,11 @@ class ImagenCompleta : AppCompatActivity() {
             val nuevo = MediaPlayer()
             nuevo.setDataSource(filePath)
             nuevo.setOnPreparedListener {
-                audioButton.text = "Pausar"
+                audioButton.text = getString(R.string.pausar)
                 it.start()
             }
             nuevo.setOnCompletionListener {
-                audioButton.text = "Reproducir"
+                audioButton.text = getString(R.string.reproducir)
                 it.reset()
                 it.release()
                 mediaPlayer = null
@@ -381,10 +385,10 @@ class ImagenCompleta : AppCompatActivity() {
 
         if (mp.isPlaying) {
             mp.pause()
-            audioButton.text = "Reproducir"
+            audioButton.text = getString(R.string.reproducir)
         } else {
             mp.start()
-            audioButton.text = "Pausar"
+            audioButton.text = getString(R.string.pausar)
         }
     }
 

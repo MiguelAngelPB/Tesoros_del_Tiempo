@@ -42,7 +42,7 @@
         android:id="@+id/btn_audio_play_pause"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Reproducir"
+        android:text="@string/reproducir"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/actionsBottom"
         app:layout_constraintEnd_toEndOf="parent"
@@ -77,7 +77,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Te acuerdas…"
+            android:text="@string/te_acuerdas"
             android:textSize="16sp" />
 
         <Button
@@ -86,6 +86,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="Papelera" />
+            android:text="@string/papelera_btn" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
