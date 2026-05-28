@@ -11,6 +11,7 @@ import com.example.tesorosdeltiempo.BD.datos.RecuerdosEntity
 import com.example.tesorosdeltiempo.R
 import com.example.tesorosdeltiempo.seguridad.AyArchivoSeguro
 import java.io.File
+import android.media.MediaMetadataRetriever
 
 // Miniaturas del GridView principal con foto decodificada o icono según el tipo
 class GaleriaFotosAdap(private val mContext: Context) : BaseAdapter() {
@@ -31,9 +32,8 @@ class GaleriaFotosAdap(private val mContext: Context) : BaseAdapter() {
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val imageView = (convertView as? ImageView) ?: ImageView(mContext)
         val recuerdo = recuerdos[position]
-
-        when (recuerdo.type) {
-            mContext.getString(R.string.foto) -> {
+        when (recuerdo.type.trim().uppercase()) {
+            "FOTO" -> {
                 val bitmap = if (AyArchivoSeguro.esRutaArchivoCifrado(recuerdo.filePath)) {
                     var tempFile: File? = null
                     try {
@@ -56,13 +56,49 @@ class GaleriaFotosAdap(private val mContext: Context) : BaseAdapter() {
                     imageView.setImageResource(android.R.drawable.ic_menu_report_image)
                 }
             }
-            mContext.getString(R.string.video) -> {
-                imageView.setImageResource(android.R.drawable.ic_media_play)
+            "VIDEO" -> {
+                // Miniatura real del vídeo (si está cifrado, descifra a temporal para generar thumbnail)
+                var tempFile: File? = null
+                val bmp = try {
+                    val ruta = if (AyArchivoSeguro.esRutaArchivoCifrado(recuerdo.filePath)) {
+                        tempFile = AyArchivoSeguro.descifrarAFicheroTemporal(
+                            mContext,
+                            recuerdo.filePath,
+                            "thumb_video",
+                            ".mp4"
+                        )
+                        tempFile!!.absolutePath
+                    } else {
+                        recuerdo.filePath
+                    }
+                    val f = File(ruta)
+                    if (!f.exists()) {
+                        null
+                    } else {
+                        val retriever = MediaMetadataRetriever()
+                        try {
+                            retriever.setDataSource(f.absolutePath)
+                            retriever.getFrameAtTime(0) // primer frame
+                        } finally {
+                            try { retriever.release() } catch (_: Exception) { }
+                        }
+                    }
+                } catch (_: Exception) {
+                    null
+                } finally {
+                    try { tempFile?.delete() } catch (_: Exception) { }
+                }
+
+                if (bmp != null) {
+                    imageView.setImageBitmap(bmp)
+                } else {
+                    imageView.setImageResource(android.R.drawable.ic_media_play)
+                }
             }
-            mContext.getString(R.string.audio) -> {
+            "AUDIO" -> {
                 imageView.setImageResource(android.R.drawable.ic_btn_speak_now)
             }
-            mContext.getString(R.string.texto) -> {
+            "TEXTO" -> {
                 imageView.setImageResource(android.R.drawable.ic_menu_edit)
             }
             else -> {

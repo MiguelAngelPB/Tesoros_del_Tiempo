@@ -1,8 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.TesorosDelTiempo" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <item name="colorPrimary">@color/color_primario</item>
+        <item name="colorSecondary">@color/color_acento</item>
+        <item name="colorAccent">@color/color_acento</item>
+        <item name="android:windowBackground">@color/tesoros_del_tiempo_background</item>
+        <item name="android:textColorPrimary">@color/color_texto_principal</item>
+        <item name="android:textColorSecondary">@color/color_texto_secundario</item>
+
     </style>
 
     <style name="Theme.TesorosDelTiempo" parent="Base.Theme.TesorosDelTiempo" />
