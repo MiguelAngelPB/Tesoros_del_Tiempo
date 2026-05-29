@@ -2,6 +2,8 @@ package com.example.tesorosdeltiempo.BD.datos
 
 import kotlinx.coroutines.flow.Flow
 import java.io.File
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 // Acceso al Dao
 class RecuerdosRepository(
@@ -34,7 +36,21 @@ class RecuerdosRepository(
     }
 
     suspend fun moverRecuerdoAPapeleraPorId(id: Long) {
-        dao.moverAPapeleraPorId(id)
+        dao.moverAPapeleraPorId(id, System.currentTimeMillis())
+    }
+
+    // Borra de la papelera lo que lleva más de 6 meses
+    suspend fun eliminarPapeleraCaducada() {
+        val limite = ZonedDateTime.now(ZoneId.systemDefault())
+            .minusMonths(6)
+            .toInstant()
+            .toEpochMilli()
+        dao.listarEnPapelera()
+            .filter { (it.papeleraAt ?: it.createdAt) < limite }
+            .forEach { recuerdo ->
+                eliminarArchivosEnDisco(recuerdo)
+                dao.eliminarDefinitivoPorId(recuerdo.id)
+            }
     }
 
     suspend fun restaurarDesdePapeleraPorId(id: Long) {

@@ -148,10 +148,10 @@ object GaleriaExportImport {
             put("descriptionType", r.descriptionType ?: JSONObject.NULL)
             put("descriptionContent", r.descriptionContent ?: JSONObject.NULL)
             put("createdAt", r.createdAt)
-            put("isFavorite", r.isFavorite)
             put("enPapelera", r.enPapelera)
             put("mainEntry", main ?: "")
             put("descEntry", desc ?: "")
+            put("papeleraAt", r.papeleraAt ?: JSONObject.NULL)
         }
 
     private fun jsonARecuerdo(o: JSONObject, filePath: String, descriptionPath: String?): RecuerdosEntity =
@@ -166,9 +166,8 @@ object GaleriaExportImport {
             descriptionContent = if (o.isNull("descriptionContent")) null else o.getString("descriptionContent"),
             descriptionPath = descriptionPath,
             createdAt = o.optLong("createdAt", System.currentTimeMillis()),
-            isFavorite = o.optBoolean("isFavorite", false),
-            enPapelera = o.optBoolean("enPapelera", false)
-        )
+            enPapelera = o.optBoolean("enPapelera", false),
+            papeleraAt = if (o.isNull("papeleraAt")) null else o.getLong("papeleraAt")        )
 
     fun nombreCopiaSugerido(): String {
         val f = SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault())

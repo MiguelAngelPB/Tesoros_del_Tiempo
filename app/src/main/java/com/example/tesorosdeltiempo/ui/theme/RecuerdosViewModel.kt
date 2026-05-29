@@ -18,6 +18,12 @@ class RecuerdosViewModel(
     private val repository: RecuerdosRepository
 ) : ViewModel() {
 
+    init {
+        viewModelScope.launch {
+            repository.eliminarPapeleraCaducada()
+        }
+    }
+
     private val filtroTags = MutableStateFlow("")
 
     // Galería principal

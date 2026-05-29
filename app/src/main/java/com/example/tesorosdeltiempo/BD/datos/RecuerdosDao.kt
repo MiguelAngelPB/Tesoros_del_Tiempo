@@ -44,13 +44,13 @@ interface RecuerdosDao {
     @Query("DELETE FROM recuerdos")
     suspend fun clearAll()
 
-    @Query("UPDATE recuerdos SET enPapelera = 1 WHERE id = :id AND enPapelera = 0")
-    suspend fun moverAPapeleraPorId(id: Long): Int
+    @Query("UPDATE recuerdos SET enPapelera = 1, papeleraAt = :fecha WHERE id = :id AND enPapelera = 0")
+    suspend fun moverAPapeleraPorId(id: Long, fecha: Long): Int
 
-    @Query("UPDATE recuerdos SET enPapelera = 0 WHERE id = :id AND enPapelera = 1")
+    @Query("UPDATE recuerdos SET enPapelera = 0, papeleraAt = NULL WHERE id = :id AND enPapelera = 1")
     suspend fun restaurarDesdePapeleraPorId(id: Long): Int
 
-    @Query("UPDATE recuerdos SET enPapelera = 0 WHERE enPapelera = 1")
+    @Query("UPDATE recuerdos SET enPapelera = 0, papeleraAt = NULL WHERE enPapelera = 1")
     suspend fun restaurarTodoDesdePapelera(): Int
 
     @Query("DELETE FROM recuerdos WHERE id = :id AND enPapelera = 1")

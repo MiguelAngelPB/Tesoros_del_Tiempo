@@ -16,6 +16,6 @@ data class RecuerdosEntity(
     val descriptionContent: String? = null, // texto libre
     val descriptionPath: String? = null, // ruta archivo descripción multimedia
     val createdAt: Long = System.currentTimeMillis(),
-    val isFavorite: Boolean = false,
-    val enPapelera: Boolean = false
+    val enPapelera: Boolean = false,
+    val papeleraAt: Long? = null // momento en que pasó a la papelera
 )
