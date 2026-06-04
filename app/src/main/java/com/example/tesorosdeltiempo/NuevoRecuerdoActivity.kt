@@ -1,3 +1,4 @@
+@file:Suppress("DEPRECATION") // Suprime las advertencias de obsolescencia
 package com.example.tesorosdeltiempo
 
 import android.content.Intent

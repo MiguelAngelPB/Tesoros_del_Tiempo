@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 // Capa entre las pantallas yel  repositorio con operaciones en segundo plano.
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class) // Autoriza el uso de APIs experimentales que nos permiten actualizar los datos de la pantalla al instante y de forma fluida
 class RecuerdosViewModel(
     private val repository: RecuerdosRepository
 ) : ViewModel() {

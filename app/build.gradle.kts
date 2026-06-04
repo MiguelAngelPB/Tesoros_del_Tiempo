@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
+    id("org.sonarqube")
 }
 
 android {
@@ -22,7 +23,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -37,6 +38,14 @@ android {
         viewBinding = true
         compose = true
     }
+
+    // 1. CONFIGURACIÓN DE LINT
+    lint {
+        abortOnError = false
+        xmlReport = true
+        htmlReport = true
+        xmlOutput = file("${project.layout.buildDirectory.get().asFile}/outputs/lint-results-mockDebug.xml")
+    }
 }
 
 dependencies {
@@ -44,7 +53,6 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
-    // Cifrado de credenciales
     implementation("androidx.security:security-crypto:1.1.0")
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
@@ -67,4 +75,13 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+}
+sonar {
+    properties {
+        property("sonar.projectName", "Tesoros del Tiempo")
+        property("sonar.projectKey", "Tesoros-del-tiempo")
+        property("sonar.language", "kotlin")
+        property("sonar.exclusions", "**/*.png, **/*.jpg, **/*.webp, build/**")
+        property("sonar.android.lint.report", "${project.layout.buildDirectory.get().asFile}/outputs/lint-results-mockDebug.xml")
+    }
 }
