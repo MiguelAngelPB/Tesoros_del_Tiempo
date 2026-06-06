@@ -125,4 +125,8 @@
     <string name="restaurar">Restaurar</string>
     <string name="a_adir_recuerdos">Añadir Recuerdos</string>
     <string name="etiquetas_separadas_por_comas">Etiquetas (separadas por comas)</string>
+    <string name="bio_titulo">Desbloquear Tesoros del Tiempo</string>
+    <string name="bio_subtitulo">Confirma que eres tú</string>
+    <string name="bio_descripcion">Usa tu huella, rostro o el PIN o patrón del teléfono</string>
+    <string name="bio_sin_bloqueo_sistema">Configura un método de verificación en Ajustes del teléfono (huella, PIN o patrón) para poder usar la aplicación.</string>
 </resources>

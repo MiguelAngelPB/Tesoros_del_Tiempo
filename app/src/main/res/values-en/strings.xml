@@ -126,4 +126,8 @@
     <string name="restaurar">Restore</string>
     <string name="a_adir_recuerdos">Add Memories</string>
     <string name="etiquetas_separadas_por_comas">Tags (comma separated)</string>
+    <string name="bio_titulo">Unlock Treasures of Time</string>
+    <string name="bio_subtitulo">Confirm it\'s you</string>
+    <string name="bio_descripcion">Use your fingerprint, face, or your phone PIN or pattern</string>
+    <string name="bio_sin_bloqueo_sistema">Set up verification in phone Settings (fingerprint, PIN or pattern) to use this app.</string>
 </resources>
