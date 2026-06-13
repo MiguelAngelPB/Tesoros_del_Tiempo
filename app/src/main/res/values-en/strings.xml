@@ -130,4 +130,25 @@
     <string name="bio_subtitulo">Confirm it\'s you</string>
     <string name="bio_descripcion">Use your fingerprint, face, or your phone PIN or pattern</string>
     <string name="bio_sin_bloqueo_sistema">Set up verification in phone Settings (fingerprint, PIN or pattern) to use this app.</string>
+    <string name="tutorial_ver_btn">View tutorial</string>
+    <string name="tutorial_anterior">Previous</string>
+    <string name="tutorial_siguiente">Next</string>
+    <string name="tutorial_finalizar">Finish</string>
+    <string name="tutorial_cerrar">Close</string>
+    <string name="tutorial_progreso">Step %1$d of %2$d</string>
+    <string name="tutorial_sin_video">Video not included. Add the .mp4 file in app/src/main/res/raw/</string>
+    <string name="tutorial_paso1_titulo">Add a memory</string>
+    <string name="tutorial_paso1_texto">Tap the + button on the gallery to create a new memory. Choose photo, video, audio or text and add tags to find it later.</string>
+    <string name="tutorial_paso2_titulo">Search memories</string>
+    <string name="tutorial_paso2_texto">Type in the top bar to filter by tags. The gallery updates instantly with matching memories.</string>
+    <string name="tutorial_paso3_titulo">View a memory</string>
+    <string name="tutorial_paso3_texto">Tap a memory in the gallery to open it. Press «Do you remember…» to read or listen to its description.</string>
+    <string name="tutorial_paso4_titulo">Send to trash</string>
+    <string name="tutorial_paso4_texto">From the memory detail screen you can send it to the trash. It is not deleted immediately: the caregiver can restore or permanently delete it from Settings.</string>
+    <string name="tutorial_paso5_titulo">Caregiver trash</string>
+    <string name="tutorial_paso5_texto">When logged in as caregiver, go to Settings → Trash. You can restore memories to the gallery or delete them permanently (one by one or all).</string>
+    <string name="tutorial_paso6_titulo">Export the gallery</string>
+    <string name="tutorial_paso6_texto">In Settings, with session started, tap «Export data» to save a .zip copy of your memories. Use it to move them to another phone with this app.</string>
+    <string name="tutorial_paso7_titulo">Import the gallery</string>
+    <string name="tutorial_paso7_texto">In Settings, tap «Import data» and choose a previously exported .zip. Memories are added to those already on this device.</string>
 </resources>

@@ -19,6 +19,7 @@ import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import com.example.tesorosdeltiempo.tutorial.TutorialDialogoAy
 
 // Ajustes login/registro cuidador, papelera (solo con sesión) y barra
 class AjustesActivity : AppCompatActivity() {
@@ -33,6 +34,7 @@ class AjustesActivity : AppCompatActivity() {
     private lateinit var btnExportarGaleria: Button
     private lateinit var btnImportarGaleria: Button
     private lateinit var btnCambiarIdioma: Button
+    private lateinit var btnTutorial: Button
 
     private val lanzadorExportarZip =
         registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri: Uri? ->
@@ -99,6 +101,15 @@ class AjustesActivity : AppCompatActivity() {
         btnExportarGaleria = findViewById(R.id.btnExportarGaleria)
         btnImportarGaleria = findViewById(R.id.btnImportarGaleria)
         btnCambiarIdioma = findViewById(R.id.btnCambiarIdioma)
+        btnTutorial = findViewById(R.id.btnTutorial)
+
+        btnTutorial.setOnClickListener {
+            TutorialDialogoAy.mostrar(
+                activity = this,
+                incluirPasosCuidador = auth.estaConectado(),
+                marcarComoVistoAlTerminar = false
+            )
+        }
 
         // Papelera solo con el cuidador conectado (se oculta si no)
         btnPapelera.setOnClickListener {

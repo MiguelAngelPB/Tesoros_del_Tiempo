@@ -14,6 +14,9 @@ import com.example.tesorosdeltiempo.ui.RecuerdosViewModelFactory
 import com.example.tesorosdeltiempo.ui.BarraArribaAy
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
+import com.example.tesorosdeltiempo.seguridad.CuidadorAuthManager
+import com.example.tesorosdeltiempo.tutorial.TutorialDialogoAy
+import com.example.tesorosdeltiempo.tutorial.TutorialPreferencias
 
 // Pantalla principal de galería de recuerdos, filtro por etiquetas y acceso a crear uno nuevo
 
@@ -69,6 +72,19 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.recuerdos.collect { lista ->
                 galeriaAdapter.submitList(lista)
+            }
+        }
+
+        if (!TutorialPreferencias.yaSeMostro(this)) {
+            window.decorView.post {
+                // Validación de seguridad
+                if (!this.isFinishing && !this.isDestroyed) {
+                    TutorialDialogoAy.mostrar(
+                        activity = this,
+                        incluirPasosCuidador = CuidadorAuthManager(this).estaConectado(),
+                        marcarComoVistoAlTerminar = true
+                    )
+                }
             }
         }
     }

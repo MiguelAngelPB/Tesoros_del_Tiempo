@@ -129,4 +129,25 @@
     <string name="bio_subtitulo">Confirma que eres tú</string>
     <string name="bio_descripcion">Usa tu huella, rostro o el PIN o patrón del teléfono</string>
     <string name="bio_sin_bloqueo_sistema">Configura un método de verificación en Ajustes del teléfono (huella, PIN o patrón) para poder usar la aplicación.</string>
+    <string name="tutorial_ver_btn">Ver tutorial</string>
+    <string name="tutorial_anterior">Anterior</string>
+    <string name="tutorial_siguiente">Siguiente</string>
+    <string name="tutorial_finalizar">Finalizar</string>
+    <string name="tutorial_cerrar">Cerrar</string>
+    <string name="tutorial_progreso">Paso %1$d de %2$d</string>
+    <string name="tutorial_sin_video">Vídeo no incluido. Añade el archivo .mp4 en app/src/main/res/raw/</string>
+    <string name="tutorial_paso1_titulo">Añadir un recuerdo</string>
+    <string name="tutorial_paso1_texto">Pulsa el botón + de la galería para crear un recuerdo nuevo. Elige foto, vídeo, audio o texto y, si quieres, añade etiquetas para encontrarlo después.</string>
+    <string name="tutorial_paso2_titulo">Buscar recuerdos</string>
+    <string name="tutorial_paso2_texto">Escribe en la barra superior para filtrar por etiquetas. La galería se actualiza al instante con los recuerdos que coincidan.</string>
+    <string name="tutorial_paso3_titulo">Ver un recuerdo</string>
+    <string name="tutorial_paso3_texto">Toca un recuerdo de la galería para abrirlo. Pulsa «Te acuerdas…» para leer o escuchar la descripción asociada al recuerdo.</string>
+    <string name="tutorial_paso4_titulo">Enviar a la papelera</string>
+    <string name="tutorial_paso4_texto">Desde el detalle del recuerdo puedes enviarlo a la papelera. No se borra al instante: el cuidador podrá restaurarlo o eliminarlo definitivamente desde Ajustes.</string>
+    <string name="tutorial_paso5_titulo">Papelera del cuidador</string>
+    <string name="tutorial_paso5_texto">Con sesión de cuidador, entra en Ajustes → Papelera. Ahí puedes restaurar recuerdos a la galería o borrarlos definitivamente (uno a uno o todos).</string>
+    <string name="tutorial_paso6_titulo">Exportar la galería</string>
+    <string name="tutorial_paso6_texto">En Ajustes, con sesión iniciada, pulsa «Exportar datos» para guardar una copia .zip con tus recuerdos. Úsala para trasladarlos a otro móvil con la misma app.</string>
+    <string name="tutorial_paso7_titulo">Importar la galería</string>
+    <string name="tutorial_paso7_texto">En Ajustes, pulsa «Importar datos» y elige un .zip exportado antes. Los recuerdos se añaden a los que ya tienes en este dispositivo.</string>
 </resources>
