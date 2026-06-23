@@ -18,6 +18,8 @@ room = "2.8.4"
 navigationFragmentKtxVersion = "2.9.8"
 navigationUiKtxVersion = "2.9.8"
 biometric = "1.1.0"
+mockk = "1.13.13"
+coroutinesTest = "1.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +49,8 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtxVersion" }
 navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtxVersion" }
 androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

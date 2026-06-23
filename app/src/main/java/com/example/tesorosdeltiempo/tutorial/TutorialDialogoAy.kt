@@ -19,83 +19,22 @@ object TutorialDialogoAy {
         val videoRawRes: Int?
     )
 
+    private data class VistaTutorial(
+        val titulo: TextView,
+        val progreso: TextView,
+        val videoView: VideoView,
+        val sinVideo: TextView,
+        val texto: TextView
+    )
+
     fun mostrar(
         activity: AppCompatActivity,
         incluirPasosCuidador: Boolean,
         marcarComoVistoAlTerminar: Boolean = false
     ) {
-        val pasos = pasosBase().toMutableList()
-        if (incluirPasosCuidador) {
-            pasos.addAll(pasosCuidador())
-        }
-
+        val pasos = construirPasos(incluirPasosCuidador)
         val vista = LayoutInflater.from(activity).inflate(R.layout.dialog_tutorial_paso, null)
-        val tvTitulo = vista.findViewById<TextView>(R.id.tvTutorialTitulo)
-        val tvProgreso = vista.findViewById<TextView>(R.id.tvTutorialProgreso)
-        val videoView = vista.findViewById<VideoView>(R.id.videoTutorial)
-        val tvSinVideo = vista.findViewById<TextView>(R.id.tvTutorialSinVideo)
-        val tvTexto = vista.findViewById<TextView>(R.id.tvTutorialTexto)
-
-        var indice = 0
-
-        fun detenerVideo() {
-            try {
-                videoView.stopPlayback()
-            } catch (_: Exception) { }
-        }
-
-        fun cargarPaso(i: Int) {
-            val paso = pasos[i]
-            tvTitulo.setText(paso.tituloRes)
-            tvTexto.setText(paso.textoRes)
-            tvProgreso.text = activity.getString(R.string.tutorial_progreso, i + 1, pasos.size)
-
-            // Usamos el ID del vídeo
-            if (paso.videoRawRes != null && paso.videoRawRes != 0) {
-                tvSinVideo.visibility = View.GONE
-                (videoView.parent as? ViewGroup)?.visibility = View.VISIBLE
-                detenerVideo()
-
-                // Pasamos el ID del vídeo a la URI
-                videoView.setVideoURI(
-                    Uri.parse("android.resource://${activity.packageName}/${paso.videoRawRes}")
-                )
-
-                // Si el vídeo falla en la APK, lo ocultamos y mostramos el texto
-                videoView.setOnErrorListener { _, _, _ ->
-                    detenerVideo()
-                    (videoView.parent as? ViewGroup)?.visibility = View.GONE
-                    tvSinVideo.visibility = View.VISIBLE
-                    true
-                }
-
-                videoView.setOnPreparedListener { mp ->
-                    mp.isLooping = true
-                    try {
-                        mp.setVideoScalingMode(
-                            android.media.MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
-                        )
-                    } catch (_: Exception) { }
-                    mp.start()
-                }
-            } else {
-                detenerVideo()
-                (videoView.parent as? ViewGroup)?.visibility = View.GONE
-                tvSinVideo.visibility = View.VISIBLE
-            }
-        }
-
-        fun actualizarBotones(dialogo: AlertDialog, idx: Int) {
-            val btnPos = dialogo.getButton(AlertDialog.BUTTON_POSITIVE)
-            val btnNeg = dialogo.getButton(AlertDialog.BUTTON_NEGATIVE)
-            btnNeg.isEnabled = idx > 0
-            btnNeg.alpha = if (idx > 0) 1f else 0.4f
-            btnPos.text = if (idx < pasos.size - 1) {
-                activity.getString(R.string.tutorial_siguiente)
-            } else {
-                activity.getString(R.string.tutorial_finalizar)
-            }
-        }
+        val refs = crearVistaTutorial(vista)
 
         val dialogo = AlertDialog.Builder(activity)
             .setView(vista)
@@ -105,45 +44,154 @@ object TutorialDialogoAy {
             .setNeutralButton(R.string.tutorial_cerrar, null)
             .create()
 
-        dialogo.setOnDismissListener { detenerVideo() }
-
+        dialogo.setOnDismissListener { detenerVideo(refs.videoView) }
         dialogo.setOnShowListener {
-            val ancho = (activity.resources.displayMetrics.widthPixels * 0.92).toInt()
-            dialogo.window?.setLayout(ancho, android.view.WindowManager.LayoutParams.WRAP_CONTENT)
+            configurarVentana(activity, dialogo)
+            enlazarBotones(dialogo, activity, pasos, refs, marcarComoVistoAlTerminar)
+        }
 
-            cargarPaso(indice)
-            actualizarBotones(dialogo, indice)
+        dialogo.show()
+    }
 
-            dialogo.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
-                if (indice > 0) {
-                    indice--
-                    cargarPaso(indice)
-                    actualizarBotones(dialogo, indice)
-                }
+    private fun construirPasos(incluirPasosCuidador: Boolean): List<Paso> {
+        val pasos = pasosBase().toMutableList()
+        if (incluirPasosCuidador) {
+            pasos.addAll(pasosCuidador())
+        }
+        return pasos
+    }
+
+    private fun crearVistaTutorial(vista: View) = VistaTutorial(
+        titulo = vista.findViewById(R.id.tvTutorialTitulo),
+        progreso = vista.findViewById(R.id.tvTutorialProgreso),
+        videoView = vista.findViewById(R.id.videoTutorial),
+        sinVideo = vista.findViewById(R.id.tvTutorialSinVideo),
+        texto = vista.findViewById(R.id.tvTutorialTexto)
+    )
+
+    private fun configurarVentana(activity: AppCompatActivity, dialogo: AlertDialog) {
+        val ancho = (activity.resources.displayMetrics.widthPixels * 0.92).toInt()
+        dialogo.window?.setLayout(ancho, android.view.WindowManager.LayoutParams.WRAP_CONTENT)
+    }
+
+    private fun detenerVideo(videoView: VideoView) {
+        try {
+            videoView.stopPlayback()
+        } catch (_: Exception) {
+            // Se ignora por si el vídeo puede no estar inicializado o ya estar detenido
+        }
+    }
+
+    private fun cargarPaso(
+        activity: AppCompatActivity,
+        pasos: List<Paso>,
+        refs: VistaTutorial,
+        indice: Int
+    ) {
+        val paso = pasos[indice]
+        refs.titulo.setText(paso.tituloRes)
+        refs.texto.setText(paso.textoRes)
+        refs.progreso.text = activity.getString(R.string.tutorial_progreso, indice + 1, pasos.size)
+
+        // Usamos el ID del vídeo
+        if (paso.videoRawRes != null && paso.videoRawRes != 0) {
+            mostrarVideo(activity, refs, paso.videoRawRes)
+        } else {
+            ocultarVideo(refs)
+        }
+    }
+
+    private fun mostrarVideo(activity: AppCompatActivity, refs: VistaTutorial, videoRawRes: Int) {
+        refs.sinVideo.visibility = View.GONE
+        (refs.videoView.parent as? ViewGroup)?.visibility = View.VISIBLE
+        detenerVideo(refs.videoView)
+
+        refs.videoView.setVideoURI(
+            Uri.parse("android.resource://${activity.packageName}/$videoRawRes")
+        )
+        refs.videoView.setOnErrorListener { _, _, _ ->
+            ocultarVideo(refs)
+            true
+        }
+        refs.videoView.setOnPreparedListener { mp ->
+            mp.isLooping = true
+            aplicarEscaladoVideo(mp)
+            mp.start()
+        }
+    }
+
+    private fun aplicarEscaladoVideo(mp: android.media.MediaPlayer) {
+        try {
+            mp.setVideoScalingMode(
+                android.media.MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+            )
+        } catch (_: Exception) {
+            // Se ignora ya que algunos dispositivos no soportan el modo de escalado
+        }
+    }
+    private fun ocultarVideo(refs: VistaTutorial) {
+        detenerVideo(refs.videoView)
+        (refs.videoView.parent as? ViewGroup)?.visibility = View.GONE
+        refs.sinVideo.visibility = View.VISIBLE
+    }
+
+    private fun actualizarBotones(
+        dialogo: AlertDialog,
+        activity: AppCompatActivity,
+        pasos: List<Paso>,
+        indice: Int
+    ) {
+        val btnPos = dialogo.getButton(AlertDialog.BUTTON_POSITIVE)
+        val btnNeg = dialogo.getButton(AlertDialog.BUTTON_NEGATIVE)
+        btnNeg.isEnabled = indice > 0
+        btnNeg.alpha = if (indice > 0) 1f else 0.4f
+        btnPos.text = if (indice < pasos.size - 1) {
+            activity.getString(R.string.tutorial_siguiente)
+        } else {
+            activity.getString(R.string.tutorial_finalizar)
+        }
+    }
+
+    private fun enlazarBotones(
+        dialogo: AlertDialog,
+        activity: AppCompatActivity,
+        pasos: List<Paso>,
+        refs: VistaTutorial,
+        marcarComoVistoAlTerminar: Boolean
+    ) {
+        var indice = 0
+        cargarPaso(activity, pasos, refs, indice)
+        actualizarBotones(dialogo, activity, pasos, indice)
+
+        dialogo.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+            if (indice > 0) {
+                indice--
+                cargarPaso(activity, pasos, refs, indice)
+                actualizarBotones(dialogo, activity, pasos, indice)
             }
+        }
 
-            dialogo.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                if (indice < pasos.size - 1) {
-                    indice++
-                    cargarPaso(indice)
-                    actualizarBotones(dialogo, indice)
-                } else {
-                    if (marcarComoVistoAlTerminar) {
-                        TutorialPreferencias.marcarComoVisto(activity)
-                    }
-                    dialogo.dismiss()
-                }
-            }
-
-            dialogo.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-                if (marcarComoVistoAlTerminar) {
-                    TutorialPreferencias.marcarComoVisto(activity)
-                }
+        dialogo.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            if (indice < pasos.size - 1) {
+                indice++
+                cargarPaso(activity, pasos, refs, indice)
+                actualizarBotones(dialogo, activity, pasos, indice)
+            } else {
+                marcarVistoSiCorresponde(activity, marcarComoVistoAlTerminar)
                 dialogo.dismiss()
             }
         }
 
-        dialogo.show()
+        dialogo.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+            marcarVistoSiCorresponde(activity, marcarComoVistoAlTerminar)
+            dialogo.dismiss()
+        }
+    }
+
+    private fun marcarVistoSiCorresponde(activity: AppCompatActivity, marcar: Boolean) {
+        if (marcar) {
+            TutorialPreferencias.marcarComoVisto(activity)
+        }
     }
 
     private fun pasosBase(): List<Paso> = listOf(

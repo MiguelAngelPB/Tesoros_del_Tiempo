@@ -74,6 +74,21 @@ class RecuerdosViewModelTest {
     }
 
     @Test
+    fun borrar_recuerdo_y_restaurar_todo() = runTest {
+        val r = RecuerdosEntity(title = "Antiguo", type = "TEXTO")
+        coEvery { repo.borrarRecuerdo(r) } returns Unit
+        coEvery { repo.restaurarTodoDesdePapelera() } returns Unit
+
+        val vm = viewModel()
+        vm.borrarRecuerdo(r)
+        vm.restaurarTodoDesdePapelera()
+        advanceUntilIdle()
+
+        coVerify { repo.borrarRecuerdo(r) }
+        coVerify { repo.restaurarTodoDesdePapelera() }
+    }
+
+    @Test
     fun filtrar_por_etiqueta_usa_busqueda() = runTest {
         every { repo.observeRecuerdosByTag("familia") } returns flowOf(emptyList())
 
@@ -85,6 +100,46 @@ class RecuerdosViewModelTest {
         advanceUntilIdle()
 
         verify { repo.observeRecuerdosByTag("familia") }
+        job.cancel()
+    }
+
+    @Test
+    fun borrar_por_id_delega_en_repositorio() = runTest {
+        coEvery { repo.borrarRecuerdoPorId(5L) } returns Unit
+
+        val vm = viewModel()
+        vm.borrarRecuerdoPorId(5L)
+        advanceUntilIdle()
+
+        coVerify { repo.borrarRecuerdoPorId(5L) }
+    }
+
+    @Test
+    fun filtro_vacio_vuelve_a_lista_completa() = runTest {
+        val vm = viewModel()
+        val job = launch { vm.recuerdos.collect { } }
+        advanceUntilIdle()
+
+        vm.filtrarPorEtiqueta("familia")
+        advanceUntilIdle()
+        vm.filtrarPorEtiqueta("")
+        advanceUntilIdle()
+
+        verify(atLeast = 1) { repo.observeRecuerdos() }
+        job.cancel()
+    }
+
+    @Test
+    fun papelera_observa_repositorio() = runTest {
+        every { repo.observePapelera() } returns flowOf(
+            listOf(RecuerdosEntity(id = 3L, title = "Borrado", type = "FOTO", enPapelera = true))
+        )
+
+        val vm = viewModel()
+        val job = launch { vm.papelera.collect { } }
+        advanceUntilIdle()
+
+        verify { repo.observePapelera() }
         job.cancel()
     }
 }

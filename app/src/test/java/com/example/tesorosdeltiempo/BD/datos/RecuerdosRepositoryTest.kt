@@ -110,18 +110,81 @@ class RecuerdosRepositoryTest {
         coVerify { dao.eliminarTodoEnPapeleraDefinitivo() }
     }
 
+    @Test
+    fun borrar_por_id_y_toda_la_tabla() = runTest {
+        coEvery { dao.deleteById(8L) } returns Unit
+        coEvery { dao.clearAll() } returns Unit
+
+        repo.borrarRecuerdoPorId(8L)
+        repo.borrarTodo()
+
+        coVerify { dao.deleteById(8L) }
+        coVerify { dao.clearAll() }
+    }
+
+    @Test
+    fun restaurar_toda_la_papelera() = runTest {
+        coEvery { dao.restaurarTodoDesdePapelera() } returns 2
+
+        repo.restaurarTodoDesdePapelera()
+
+        coVerify { dao.restaurarTodoDesdePapelera() }
+    }
+
+    @Test
+    fun eliminar_definitivo_si_id_no_existe() = runTest {
+        coEvery { dao.obtenerPorId(99L) } returns null
+
+        repo.eliminarDefinitivoDesdePapeleraPorId(99L)
+
+        coVerify(exactly = 0) { dao.eliminarDefinitivoPorId(any()) }
+    }
+
+    @Test
+    fun purga_usa_createdAt_si_no_hay_papeleraAt() = runTest {
+        val fichero = File.createTempFile("ant", ".enc")
+        val antiguo = Instant.now().minus(220, ChronoUnit.DAYS).toEpochMilli()
+        val r = recuerdo(
+            id = 10L,
+            path = fichero.absolutePath,
+            enPapelera = true,
+            createdAt = antiguo
+        )
+
+        coEvery { dao.listarEnPapelera() } returns listOf(r)
+        coEvery { dao.eliminarDefinitivoPorId(10L) } returns 1
+
+        repo.eliminarPapeleraCaducada()
+
+        assertFalse(fichero.exists())
+        coVerify { dao.eliminarDefinitivoPorId(10L) }
+    }
+
+    @Test
+    fun eliminar_definitivo_sin_ficheros_en_disco() = runTest {
+        val r = recuerdo(id = 11L, enPapelera = true)
+        coEvery { dao.obtenerPorId(11L) } returns r
+        coEvery { dao.eliminarDefinitivoPorId(11L) } returns 1
+
+        repo.eliminarDefinitivoDesdePapeleraPorId(11L)
+
+        coVerify { dao.eliminarDefinitivoPorId(11L) }
+    }
+
     private fun recuerdo(
         id: Long,
         path: String = "",
         descPath: String? = null,
         enPapelera: Boolean = false,
-        papeleraAt: Long? = null
+        papeleraAt: Long? = null,
+        createdAt: Long = System.currentTimeMillis()
     ) = RecuerdosEntity(
         id = id,
         title = "Prueba",
         type = "FOTO",
         filePath = path,
         descriptionPath = descPath,
+        createdAt = createdAt,
         enPapelera = enPapelera,
         papeleraAt = papeleraAt
     )
