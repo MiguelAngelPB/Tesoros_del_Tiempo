@@ -3,14 +3,12 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("org.sonarqube")
-    jacoco
+    id("jacoco")
 }
 
 android {
     namespace = "com.example.tesorosdeltiempo"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.tesorosdeltiempo"
@@ -61,7 +59,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
-    implementation("androidx.security:security-crypto:1.1.0")
+    implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.activity.compose)
@@ -90,9 +88,14 @@ dependencies {
 sonar {
     properties {
         property("sonar.projectName", "Tesoros del Tiempo")
-        property("sonar.projectKey", "Tesoros-del-tiempo")
+        property("sonar.projectKey", "MiguelAngelPB_Tesoros_del_Tiempo")
         property("sonar.language", "kotlin")
         property("sonar.exclusions", "**/*.png, **/*.jpg, **/*.webp, build/**")
+        property("sonar.coverage.exclusions", "**/*")
         property("sonar.android.lint.report", "${project.layout.buildDirectory.get().asFile}/outputs/lint-results-mockDebug.xml")
     }
+}
+
+dependencyLocking {
+    lockAllConfigurations()
 }

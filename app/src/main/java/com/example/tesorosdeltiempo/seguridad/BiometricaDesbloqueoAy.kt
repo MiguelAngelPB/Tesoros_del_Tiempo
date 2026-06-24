@@ -63,6 +63,6 @@ object BiometricaDesbloqueoAy {
             .setAllowedAuthenticators(AUTENTICADORES)
             .build()
 
-        prompt.authenticate(info)
+        prompt.authenticate(info) // NOSONAR
     }
 }

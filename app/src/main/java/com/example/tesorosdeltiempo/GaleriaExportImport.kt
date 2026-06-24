@@ -118,7 +118,9 @@ object GaleriaExportImport {
             } catch (e: Throwable) {
                 Result.failure(e)
             } finally {
-                temp.delete()
+                if (!temp.delete()) {
+                    temp.deleteOnExit()
+                }
             }
         }
 
