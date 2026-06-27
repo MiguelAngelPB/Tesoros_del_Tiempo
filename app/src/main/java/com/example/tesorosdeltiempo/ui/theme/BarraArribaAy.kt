@@ -12,6 +12,15 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.tesorosdeltiempo.AjustesActivity
 import com.example.tesorosdeltiempo.MainActivity
 import com.example.tesorosdeltiempo.R
+import com.example.tesorosdeltiempo.seguridad.CuidadorAuthManager
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import android.widget.TextView
+import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
+import android.view.ViewGroup
+import android.widget.Button
+import android.view.LayoutInflater
 
 /**
  Esto es un "helper" para no repetir lo mismo en todas las Activities
@@ -60,5 +69,58 @@ object BarraArribaAy {
                 cuandoCambiaBusqueda?.invoke(s?.toString().orEmpty())
             }
         })
+
+        ponerIndicadorCuidador(activity)
+    }
+
+    private fun ponerIndicadorCuidador(activity: Activity) {
+        val content = activity.findViewById<ViewGroup>(android.R.id.content)
+        val root = content.getChildAt(0) as? ConstraintLayout ?: return
+        var indicador = root.findViewById<TextView>(R.id.tvIndicadorCuidador)
+        if (indicador == null) {
+            indicador = LayoutInflater.from(activity)
+                .inflate(R.layout.indicador_cuidador, root, false) as TextView
+            val margen = (12 * activity.resources.displayMetrics.density).toInt()
+            val params = ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+                startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+                bottomMargin = margen
+                marginStart = margen
+            }
+            root.addView(indicador, params)
+            indicador.setOnClickListener { cerrarSesionCuidador(activity, indicador) }
+        }
+
+        actualizarIndicadorCuidador(activity, indicador)
+
+        if (activity is LifecycleOwner) {
+            activity.lifecycle.addObserver(object : DefaultLifecycleObserver {
+                override fun onResume(owner: LifecycleOwner) {
+                    actualizarIndicadorCuidador(activity, indicador)
+                }
+            })
+        }
+    }
+
+    private fun actualizarIndicadorCuidador(activity: Activity, indicador: TextView) {
+        indicador.visibility = if (CuidadorAuthManager(activity).estaConectado()) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+    }
+
+    private fun cerrarSesionCuidador(activity: Activity, indicador: TextView) {
+        val btnLogout = activity.findViewById<Button?>(R.id.btnLogoutCuidador)
+        if (btnLogout != null && btnLogout.visibility == View.VISIBLE) {
+            btnLogout.performClick()
+        } else {
+            CuidadorAuthManager(activity).cerrarSesion()
+            Toast.makeText(activity, activity.getString(R.string.sesi_n_cerrada), Toast.LENGTH_SHORT).show()
+        }
+        actualizarIndicadorCuidador(activity, indicador)
     }
 }

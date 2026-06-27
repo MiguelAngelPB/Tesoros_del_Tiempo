@@ -151,4 +151,5 @@
     <string name="tutorial_paso6_texto">In Settings, with session started, tap «Export data» to save a .zip copy of your memories. Use it to move them to another phone with this app.</string>
     <string name="tutorial_paso7_titulo">Import the gallery</string>
     <string name="tutorial_paso7_texto">In Settings, tap «Import data» and choose a previously exported .zip. Memories are added to those already on this device.</string>
+    <string name="indicador_cuidador">Caregiver</string>
 </resources>

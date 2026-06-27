@@ -150,4 +150,5 @@
     <string name="tutorial_paso6_texto">En Ajustes, con sesión iniciada, pulsa «Exportar datos» para guardar una copia .zip con tus recuerdos. Úsala para trasladarlos a otro móvil con la misma app.</string>
     <string name="tutorial_paso7_titulo">Importar la galería</string>
     <string name="tutorial_paso7_texto">En Ajustes, pulsa «Importar datos» y elige un .zip exportado antes. Los recuerdos se añaden a los que ya tienes en este dispositivo.</string>
+    <string name="indicador_cuidador">Cuidador</string>
 </resources>
