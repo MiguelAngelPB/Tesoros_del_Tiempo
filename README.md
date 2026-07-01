@@ -20,7 +20,7 @@ Autor: Miguel Ángel Parra Bolívar · Tutor: Pedro Renedo Fernández
 
 Instala la aplicación descargando el APK:
 
-**[Descargar Tesoros del Tiempo (APK)](https://universidaddeburgos-my.sharepoint.com/:u:/g/personal/mpb1019_alu_ubu_es/IQAs8E8EM6umRYh6AFCRhSIpAT_cTVKX5fi0Pf5Qa1odVxw)**
+**[Descargar Tesoros del Tiempo (APK)](https://universidaddeburgos-my.sharepoint.com/:u:/g/personal/mpb1019_alu_ubu_es/IQCvgWppCSuCRpEM9EYZdOaTAVqHwYBYs2x0l5iA5uvglnA?e=VBUtF8)**
 
 > En el dispositivo Android, activa *Instalar aplicaciones desconocidas* para el navegador o gestor de archivos que uses antes de abrir el APK.
 
