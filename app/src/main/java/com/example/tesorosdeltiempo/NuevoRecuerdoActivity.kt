@@ -29,6 +29,7 @@ import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.appcompat.app.AlertDialog
 
 // Formulario para crear un recuerdo
 class NuevoRecuerdoActivity : AppCompatActivity() {
@@ -139,21 +140,38 @@ class NuevoRecuerdoActivity : AppCompatActivity() {
         etDescripcionTexto = findViewById(R.id.etDescripcionTextoOpcional)
         tvResumenAdjuntos = findViewById(R.id.tvResumenAdjuntos)
 
-        findViewById<Button>(R.id.btnFotoNuevo).setOnClickListener { hacerFoto() }
-        findViewById<Button>(R.id.btnVideoNuevo).setOnClickListener { grabarVideo() }
-        findViewById<Button>(R.id.btnAudioNuevo).setOnClickListener { grabarAudio() }
+        findViewById<Button>(R.id.btnFotoNuevo).setOnClickListener { confirmarSiHayPrincipal { hacerFoto() } }
+        findViewById<Button>(R.id.btnVideoNuevo).setOnClickListener { confirmarSiHayPrincipal { grabarVideo() } }
+        findViewById<Button>(R.id.btnAudioNuevo).setOnClickListener { confirmarSiHayPrincipal { grabarAudio() } }
         findViewById<Button>(R.id.btnArchivoNuevo).setOnClickListener {
-            archivoLauncher.launch(arrayOf("image/*", "video/*", "audio/*"))
+            confirmarSiHayPrincipal {
+                archivoLauncher.launch(arrayOf("image/*", "video/*", "audio/*"))
+            }
         }
         findViewById<Button>(R.id.btnAdjuntarDescripcionMultimedia).setOnClickListener {
             descripcionMultimediaLauncher.launch(arrayOf("image/*", "video/*", "audio/*"))
         }
         findViewById<Button>(R.id.btnTextoSoloNuevo).setOnClickListener {
-            usarTextoComoPrincipal()
+            confirmarSiHayPrincipal { usarTextoComoPrincipal() }
         }
         findViewById<Button>(R.id.btnGuardarRecuerdo).setOnClickListener {
             guardarRecuerdo()
         }
+    }
+
+    // Si ya hay contenido principal, avisa antes de cambiarlo
+    private fun confirmarSiHayPrincipal(accion: () -> Unit) {
+        val tipo = selectedMainType
+        if (tipo.isNullOrBlank()) {
+            accion()
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.confirmar_cambio_contenido_titulo)
+            .setMessage(getString(R.string.confirmar_cambio_contenido_mensaje, traducirTipoAVisual(tipo)))
+            .setNegativeButton(R.string.cancelar, null)
+            .setPositiveButton(R.string.si) { _, _ -> accion() }
+            .show()
     }
 
     // Cámara escribe en un File temporal y FileProvider da el Uri al sistema

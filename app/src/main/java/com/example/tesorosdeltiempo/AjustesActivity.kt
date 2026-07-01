@@ -125,9 +125,7 @@ class AjustesActivity : AppCompatActivity() {
         }
 
         btnLogoutCuidador.setOnClickListener {
-            auth.cerrarSesion()
-            actualizarEstadoUI()
-            Toast.makeText(this, getString(R.string.sesi_n_cerrada), Toast.LENGTH_SHORT).show()
+            BarraArribaAy.confirmarCerrarSesion(this) { actualizarEstadoUI() }
         }
 
         btnExportarGaleria.setOnClickListener {
@@ -173,7 +171,7 @@ class AjustesActivity : AppCompatActivity() {
     }
 
     // Texto de estado y qué botones se muestran según la sesión
-    private fun actualizarEstadoUI() {
+    fun actualizarEstadoUI() {
         val loggedIn = auth.estaConectado()
 
         tvEstadoCuidador.text = if (loggedIn) {

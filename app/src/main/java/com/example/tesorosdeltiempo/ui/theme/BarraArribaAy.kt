@@ -19,8 +19,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import android.view.ViewGroup
-import android.widget.Button
 import android.view.LayoutInflater
+import androidx.appcompat.app.AlertDialog
 
 /**
  Esto es un "helper" para no repetir lo mismo en todas las Activities
@@ -114,13 +114,24 @@ object BarraArribaAy {
     }
 
     private fun cerrarSesionCuidador(activity: Activity, indicador: TextView) {
-        val btnLogout = activity.findViewById<Button?>(R.id.btnLogoutCuidador)
-        if (btnLogout != null && btnLogout.visibility == View.VISIBLE) {
-            btnLogout.performClick()
-        } else {
-            CuidadorAuthManager(activity).cerrarSesion()
-            Toast.makeText(activity, activity.getString(R.string.sesi_n_cerrada), Toast.LENGTH_SHORT).show()
+        confirmarCerrarSesion(activity) {
+            actualizarIndicadorCuidador(activity, indicador)
+            if (activity is AjustesActivity) {
+                activity.actualizarEstadoUI()
+            }
         }
-        actualizarIndicadorCuidador(activity, indicador)
+    }
+
+    fun confirmarCerrarSesion(activity: Activity, alConfirmar: () -> Unit = {}) {
+        AlertDialog.Builder(activity)
+            .setTitle(R.string.confirmar_cerrar_sesion_titulo)
+            .setMessage(R.string.confirmar_cerrar_sesion_mensaje)
+            .setNegativeButton(R.string.cancelar, null)
+            .setPositiveButton(R.string.si) { _, _ ->
+                CuidadorAuthManager(activity).cerrarSesion()
+                Toast.makeText(activity, activity.getString(R.string.sesi_n_cerrada), Toast.LENGTH_SHORT).show()
+                alConfirmar()
+            }
+            .show()
     }
 }

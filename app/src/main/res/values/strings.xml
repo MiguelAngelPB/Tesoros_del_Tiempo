@@ -151,4 +151,9 @@
     <string name="tutorial_paso7_titulo">Importar la galería</string>
     <string name="tutorial_paso7_texto">En Ajustes, pulsa «Importar datos» y elige un .zip exportado antes. Los recuerdos se añaden a los que ya tienes en este dispositivo.</string>
     <string name="indicador_cuidador">Cuidador</string>
+    <string name="si">Sí</string>
+    <string name="confirmar_cambio_contenido_titulo">¿Cambiar contenido?</string>
+    <string name="confirmar_cambio_contenido_mensaje">Ya has elegido %1$s como contenido principal. Si continúas, se perderá y tendrás que seleccionar otro.</string>
+    <string name="confirmar_cerrar_sesion_titulo">¿Cerrar sesión?</string>
+    <string name="confirmar_cerrar_sesion_mensaje">¿Seguro que quieres cerrar la sesión del cuidador?</string>
 </resources>

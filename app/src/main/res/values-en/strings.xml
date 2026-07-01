@@ -152,4 +152,9 @@
     <string name="tutorial_paso7_titulo">Import the gallery</string>
     <string name="tutorial_paso7_texto">In Settings, tap «Import data» and choose a previously exported .zip. Memories are added to those already on this device.</string>
     <string name="indicador_cuidador">Caregiver</string>
+    <string name="si">Yes</string>
+    <string name="confirmar_cambio_contenido_titulo">Change content?</string>
+    <string name="confirmar_cambio_contenido_mensaje">You already selected %1$s as the main content. If you continue, it will be lost and you will need to choose again.</string>
+    <string name="confirmar_cerrar_sesion_titulo">Log out?</string>
+    <string name="confirmar_cerrar_sesion_mensaje">Are you sure you want to log out as caregiver?</string>
 </resources>
